@@ -301,7 +301,40 @@
             }
 
             .empty { color: #5b6770 !important; }
-        }
+
+            /* Signature section in print: hide toggle, show signature blocks with printed canvas image */
+            .signature-toggle-row { display: none !important; }
+            #signaturesSection:not([data-print="on"]) { display: none !important; }
+            #signaturesSection[data-print="on"] {
+                display: block !important;
+                page-break-inside: avoid;
+                margin-top: 12pt;
+            }
+            .signature-block canvas { display: none !important; }
+            .signature-block .sig-print-img {
+                display: block !important;
+                width: 100%;
+                max-width: 240pt;
+                height: 50pt;
+                object-fit: contain;
+                border-bottom: 0.5pt solid #000;
+                background: #fff;
+            }
+            .signature-block .sig-clear-btn { display: none !important; }
+            .signature-block .sig-name {
+                border: none !important;
+                background: transparent !important;
+                border-bottom: 0.5pt solid #888 !important;
+                padding: 1pt 2pt !important;
+                font-size: 9pt !important;
+            }
+            .signature-statement {
+                background: #fff8d9 !important;
+                border-left: 2pt solid #ffcd00 !important;
+                font-size: 8.5pt !important;
+                padding: 4pt 8pt !important;
+                margin-top: 8pt !important;
+            }
         }
 
         /* Toast notifications */
@@ -538,6 +571,115 @@
             .pset-block-header .pset-name { min-width: 0; }
             .pset-block-header .remove-pset { width: 100%; }
         }
+
+        /* Signature section */
+        .signature-toggle-row {
+            margin-top: 20px;
+            padding: 12px 14px;
+            background: #fafcfd;
+            border: 1px solid var(--ac-tint);
+            border-radius: 4px;
+        }
+        .signature-toggle-row label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin: 0;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 0.92rem;
+            color: var(--ac-charcoal);
+            font-weight: 600;
+        }
+        .signature-toggle-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .signature-hint {
+            margin-top: 4px;
+            margin-left: 24px;
+            font-size: 0.78rem;
+            color: var(--ac-grey);
+            font-weight: 400;
+        }
+        .signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        .signature-block {
+            border: 1px solid var(--ac-tint);
+            border-left: 3px solid var(--ac-primary);
+            border-radius: 4px;
+            padding: 12px;
+            background: #fff;
+        }
+        .signature-block label {
+            margin-bottom: 6px;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 0.92rem;
+            color: var(--ac-charcoal);
+            font-weight: 600;
+        }
+        .signature-block canvas {
+            border: 1px solid #d1d4d7;
+            border-radius: 3px;
+            background: #fff;
+            cursor: crosshair;
+            display: block;
+            width: 100%;
+            height: 120px;
+            touch-action: none;
+        }
+        .signature-block canvas.empty {
+            background-image:
+                linear-gradient(to right, #d1d4d7 1px, transparent 1px),
+                linear-gradient(to bottom, #d1d4d7 1px, transparent 1px);
+            background-size: 25px 25px;
+            background-position: 0 119px;
+        }
+        .signature-block .sig-print-img {
+            display: none;
+        }
+        .signature-footer {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .signature-footer input.sig-name {
+            flex: 1;
+            min-width: 120px;
+        }
+        .sig-date {
+            font-size: 0.82rem;
+            color: var(--ac-grey);
+            white-space: nowrap;
+        }
+        .sig-clear-btn {
+            padding: 4px 10px !important;
+            font-size: 0.78rem !important;
+        }
+        .signature-statement {
+            margin-top: 14px;
+            padding: 10px 14px;
+            background: #fff8d9;
+            border-left: 3px solid var(--ac-yellow);
+            border-radius: 3px;
+            font-size: 0.9rem;
+            color: var(--ac-charcoal);
+            font-weight: 600;
+        }
+        @media (max-width: 600px) {
+            .signatures-grid { grid-template-columns: 1fr; }
+        }
         .empty { color: var(--ac-grey); font-style: italic; }
         .reports-toolbar { margin: 12px 0; }
         button.danger { color: #c0392b; border-color: #c0392b; }
@@ -690,6 +832,43 @@
             <div class="field">
                 <label for="notes">Notes</label>
                 <textarea id="notes" rows="4"></textarea>
+            </div>
+
+            <div class="signature-toggle-row">
+                <label>
+                    <input type="checkbox" id="enableSignatures">
+                    <span>Add signature section (for printed PDF only — signatures are NOT saved)</span>
+                </label>
+                <div class="signature-hint">Draw or type signatures below. They only appear on the printed PDF and are discarded when the form is saved or reset.</div>
+            </div>
+
+            <div id="signaturesSection" hidden>
+                <h3 class="section-title" style="margin-top: 24px;">Signatures</h3>
+                <div class="signatures-grid">
+                    <div class="signature-block">
+                        <label>Customer signature</label>
+                        <canvas id="customerSig" class="empty" width="600" height="200"></canvas>
+                        <img id="customerSigImg" class="sig-print-img" alt="">
+                        <div class="signature-footer">
+                            <input type="text" id="customerNameSig" class="sig-name" placeholder="Customer name">
+                            <span class="sig-date">Date: <span id="customerSigDate">—</span></span>
+                            <button type="button" class="secondary sig-clear-btn" id="clearCustomerSig">Clear</button>
+                        </div>
+                    </div>
+                    <div class="signature-block">
+                        <label>Technician signature</label>
+                        <canvas id="technicianSig" class="empty" width="600" height="200"></canvas>
+                        <img id="technicianSigImg" class="sig-print-img" alt="">
+                        <div class="signature-footer">
+                            <input type="text" id="technicianNameSig" class="sig-name" placeholder="Technician name">
+                            <span class="sig-date">Date: <span id="technicianSigDate">—</span></span>
+                            <button type="button" class="secondary sig-clear-btn" id="clearTechnicianSig">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="signature-statement" id="signatureStatement">
+                    This document has been signed by the customer and the technician.
+                </div>
             </div>
 
             <div class="actions">
@@ -888,6 +1067,8 @@
             fillForm(report);
             // A clone is a new report — give it a fresh unique ID
             setReportId();
+            // Signatures are session-only; cloning must not carry old ink from a previous form
+            if (typeof window.__clearAllSignatures === 'function') window.__clearAllSignatures();
             cloneSourceEl.value = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
             // Visible feedback
@@ -910,8 +1091,9 @@
             saveReports(reports);
             lastSavedReport = newReport;
             loadReports();
-            // Prep the form for the next entry
+            // Prep the form for the next entry — signatures are never saved, drop them
             setReportId();
+            if (typeof window.__clearAllSignatures === 'function') window.__clearAllSignatures();
             // Visible feedback: toast + scroll to the new card + flash highlight
             showToast('✓ Report saved', 'success');
             const newCard = document.querySelector(`.report-item [data-id="${newReport.id}"]`)?.closest('.report-item');
@@ -924,9 +1106,26 @@
             }
         });
 
+        // Helper to clear signatures (used after save, reset, clone)
+        function clearAllSignatures() {
+            const clearCustomerBtn = document.getElementById('clearCustomerSig');
+            const clearTechnicianBtn = document.getElementById('clearTechnicianSig');
+            if (clearCustomerBtn) clearCustomerBtn.click();
+            if (clearTechnicianBtn) clearTechnicianBtn.click();
+            document.getElementById('customerNameSig').value = '';
+            document.getElementById('technicianNameSig').value = '';
+            enableSignaturesEl.checked = false;
+            signaturesSectionEl.hidden = true;
+            signaturesSectionEl.removeAttribute('data-print');
+        }
+        window.__clearAllSignatures = clearAllSignatures; // expose for any direct callers
+
         // Regenerate the unique ID after a Clear/reset so the next report starts fresh
         form.addEventListener('reset', () => {
-            setTimeout(setReportId, 0);
+            setTimeout(() => {
+                setReportId();
+                clearAllSignatures();
+            }, 0);
         });
 
         // Clone button next to the dropdown
@@ -1155,6 +1354,138 @@
         interventionTypeEl.addEventListener('change', updateOptimizationVisibility);
         document.getElementById('addPsetBtn').addEventListener('click', () => addPset());
 
+        // ===== Signature pads (session-only — NOT saved anywhere) =====
+        const enableSignaturesEl = document.getElementById('enableSignatures');
+        const signaturesSectionEl = document.getElementById('signaturesSection');
+
+        function setupSignaturePad(canvasId, imgId, clearBtnId, dateSpanId, nameInputId) {
+            const canvas = document.getElementById(canvasId);
+            const img = document.getElementById(imgId);
+            const clearBtn = document.getElementById(clearBtnId);
+            const dateSpan = document.getElementById(dateSpanId);
+            const nameInput = document.getElementById(nameInputId);
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            let lastX = 0, lastY = 0;
+            let hasInk = false;
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const point = e.touches ? e.touches[0] : e;
+                return {
+                    x: (point.clientX - rect.left) * scaleX,
+                    y: (point.clientY - rect.top) * scaleY
+                };
+            }
+
+            function start(e) {
+                e.preventDefault();
+                drawing = true;
+                const pos = getPos(e);
+                lastX = pos.x; lastY = pos.y;
+            }
+
+            function move(e) {
+                if (!drawing) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.strokeStyle = '#1a2530';
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+                lastX = pos.x; lastY = pos.y;
+                hasInk = true;
+                canvas.classList.remove('empty');
+            }
+
+            function end() {
+                if (drawing) {
+                    drawing = false;
+                    syncToImg();
+                    syncDate();
+                }
+            }
+
+            function syncToImg() {
+                try {
+                    img.src = canvas.toDataURL('image/png');
+                } catch (_) { /* tainted canvas fallback — shouldn't happen since no cross-origin content */ }
+            }
+
+            function syncDate() {
+                if (hasInk && dateSpan) {
+                    const today = new Date();
+                    dateSpan.textContent = today.toLocaleDateString();
+                }
+            }
+
+            // Pointer events handle mouse + touch + pen uniformly
+            canvas.addEventListener('pointerdown', start);
+            canvas.addEventListener('pointermove', move);
+            canvas.addEventListener('pointerup', end);
+            canvas.addEventListener('pointercancel', end);
+            canvas.addEventListener('pointerleave', end);
+
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.classList.add('empty');
+                img.src = '';
+                hasInk = false;
+                if (dateSpan) dateSpan.textContent = '—';
+            });
+
+            return {
+                syncToImg,
+                syncDate,
+                // Check actual canvas pixels, not the in-memory flag — works even if signatures
+                // were added programmatically (e.g. by tests) without firing pointer events.
+                isEmpty: () => {
+                    if (hasInk) return false;
+                    try {
+                        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                        for (let i = 3; i < data.length; i += 4) {
+                            if (data[i] !== 0) return false;
+                        }
+                        return true;
+                    } catch (_) { return !hasInk; }
+                }
+            };
+        }
+
+        const customerPad = setupSignaturePad('customerSig', 'customerSigImg', 'clearCustomerSig', 'customerSigDate', 'customerNameSig');
+        const technicianPad = setupSignaturePad('technicianSig', 'technicianSigImg', 'clearTechnicianSig', 'technicianSigDate', 'technicianNameSig');
+
+        enableSignaturesEl.addEventListener('change', () => {
+            const on = enableSignaturesEl.checked;
+            signaturesSectionEl.hidden = !on;
+            if (on) {
+                const today = new Date().toLocaleDateString();
+                document.getElementById('customerSigDate').textContent = customerPad.isEmpty() ? '—' : today;
+                document.getElementById('technicianSigDate').textContent = technicianPad.isEmpty() ? '—' : today;
+            }
+        });
+
+        // Sync canvas images to <img> elements right before printing
+        function syncSignaturesForPrint() {
+            if (!enableSignaturesEl.checked) {
+                signaturesSectionEl.removeAttribute('data-print');
+                return;
+            }
+            customerPad.syncToImg();
+            technicianPad.syncToImg();
+            // Always set today's date if signatures are present
+            const today = new Date().toLocaleDateString();
+            if (!customerPad.isEmpty()) document.getElementById('customerSigDate').textContent = today;
+            if (!technicianPad.isEmpty()) document.getElementById('technicianSigDate').textContent = today;
+            signaturesSectionEl.setAttribute('data-print', 'on');
+        }
+
         // Save current form data to a JSON file
         document.getElementById('saveJsonBtn').addEventListener('click', () => {
             let data = collectFormData();
@@ -1203,6 +1534,8 @@
         // Print to PDF — uses the browser's built-in print dialog (Cmd/Ctrl+P),
         // and the @media print CSS strips buttons and shows a clean layout.
         document.getElementById('printBtn').addEventListener('click', () => {
+            // Sync canvas → img mirror so signatures render on the printed PDF
+            if (typeof syncSignaturesForPrint === 'function') syncSignaturesForPrint();
             window.print();
         });
 
