@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Copco Tightening Intervention Report</title>
+    <style>
+        :root {
+            --ac-primary: #006f8f;
+            --ac-primary-dark: #005d78;
+            --ac-primary-light: #0092bc;
+            --ac-tint: #b8e0ec;
+            --ac-yellow: #ffcd00;
+            --ac-charcoal: #2f363a;
+            --ac-grey: #5b6770;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            line-height: 1.6;
+            color: var(--ac-charcoal);
+            background: #f5f2ef;
+        }
+        header {
+            background: var(--ac-primary);
+            color: #fff;
+            padding: 24px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        header .inner { max-width: 900px; margin: auto; padding: 0 20px; }
+        header h1 { margin: 0; font-size: 1.6rem; font-weight: 600; }
+        header .subtitle { color: var(--ac-tint); font-size: 0.95rem; margin-top: 4px; }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+
+        form {
+            background: #fff;
+            padding: 30px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            border-top: 4px solid var(--ac-primary);
+        }
+        .section-title {
+            color: var(--ac-primary-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 28px 0 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--ac-tint);
+        }
+        .section-title:first-child { margin-top: 0; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .field { margin-bottom: 14px; }
+        .field.full { grid-column: 1 / -1; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: var(--ac-grey); }
+        input, select, textarea {
+            width: 100%;
+            padding: 9px 11px;
+            border: 1px solid #d1d4d7;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--ac-charcoal);
+            background: #f8f9f9;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--ac-primary);
+            outline: none;
+            background: #fff;
+            box-shadow: 0 0 0 2px var(--ac-tint);
+        }
+        .actions { margin-top: 24px; display: flex; gap: 12px; }
+        button {
+            padding: 11px 24px;
+            background: var(--ac-primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        button svg { flex-shrink: 0; }
+        button:hover { background: var(--ac-primary-dark); }
+        button.secondary { background: transparent; color: var(--ac-primary); border: 1px solid var(--ac-primary); }
+        button.secondary:hover { background: var(--ac-tint); }
+        .inline-group { display: flex; gap: 8px; align-items: stretch; }
+        .inline-group select { flex: 1; }
+        .inline-group button { white-space: nowrap; }
+        input[readonly] { background: #eef0f1; color: var(--ac-grey); cursor: not-allowed; }
+
+        /* Hidden but functional file input — `hidden` attr uses display:none which
+           blocks the file picker in Safari. Keep it clickable but visually hidden. */
+        #jsonFileInput {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Print-friendly layout */
+        @media print {
+            @page { margin: 1.2cm; size: A4; }
+            body { background: #fff !important; color: #000 !important; font-size: 10pt; line-height: 1.3; }
+
+            /* Ask the browser to render background colors/graphics on print */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            /* Hide the colored page header bar entirely — it was creating the blank first page */
+            header { display: none !important; }
+
+            /* Add a compact inline title at the top of the printed page — keep brand color */
+            .container::before {
+                content: "Atlas Copco Tightening Intervention Report";
+                display: block;
+                font-size: 13pt;
+                font-weight: 700;
+                color: #006f8f !important;
+                margin: 0 0 8pt 0;
+                padding-bottom: 4pt;
+                border-bottom: 1.5pt solid #006f8f !important;
+            }
+
+            /* Reset layout for print */
+            .container { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+
+            /* Form: NO page-break-inside so it flows naturally across pages */
+            form {
+                box-shadow: none !important;
+                border-top: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: #fff !important;
+            }
+
+            /* Compact section titles — keep with following content, keep brand color */
+            .section-title {
+                color: #005d78 !important;
+                border-bottom: 0.75pt solid #b8e0ec !important;
+                margin: 10pt 0 3pt !important;
+                padding-bottom: 2pt !important;
+                font-size: 10pt !important;
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            .section-title:first-of-type { margin-top: 6pt !important; }
+
+            /* Labels: smaller, uppercase */
+            label {
+                color: #5b6770 !important;
+                font-size: 7pt !important;
+                font-weight: 700 !important;
+                margin-bottom: 1pt !important;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            /* Inputs: flat, no borders */
+            input, select, textarea {
+                border: none !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                padding: 1pt 0 !important;
+                color: #2f363a !important;
+                font-size: 10pt !important;
+                border-radius: 0 !important;
+            }
+            input[readonly] { color: #5b6770 !important; font-style: italic; }
+            .field { margin-bottom: 4pt !important; break-inside: avoid; page-break-inside: avoid; }
+            .grid { gap: 4pt 8pt !important; }
+
+            /* Hide ALL interactive UI */
+            .actions,
+            #toast,
+            .toast,
+            #jsonFileInput,
+            .reports-toolbar,
+            .report-item .report-actions,
+            .inline-group button,
+            button,
+            #clearAllBtn,
+            .no-print,
+            .add-step-btn,
+            .add-step-in-pset {
+                display: none !important;
+            }
+
+            /* The Report section + Clone dropdown are not useful on paper */
+            #optimizationSection > label,
+            .inline-group { display: none !important; }
+
+            /* Section title for saved reports — keep brand color */
+            h2 { color: #005d78 !important; margin-top: 12pt !important; font-size: 11pt !important; page-break-after: avoid; }
+
+            /* Saved report cards — keep brand accent on the left bar */
+            .report-item {
+                box-shadow: none !important;
+                border: 0.5pt solid #d1d4d7 !important;
+                border-left: 2pt solid #006f8f !important;
+                padding: 6pt 8pt !important;
+                margin-bottom: 6pt !important;
+                page-break-inside: avoid;
+                background: #fff !important;
+            }
+            .report-item .meta { color: #5b6770 !important; font-size: 8pt !important; margin-bottom: 4pt !important; }
+            .report-item .group-label {
+                background: #b8e0ec !important;
+                color: #005d78 !important;
+                font-size: 7pt !important;
+                font-weight: 700 !important;
+                padding: 1pt 4pt !important;
+                margin-bottom: 2pt !important;
+                display: inline-block;
+                border-radius: 2pt;
+            }
+            .report-item .row { font-size: 9pt !important; }
+            /* Intervention type tag — keep yellow brand accent */
+            .report-item .intervention .type {
+                background: #ffcd00 !important;
+                color: #2f363a !important;
+                border: 0.5pt solid #e0b800 !important;
+                font-size: 8pt !important;
+                font-weight: 700 !important;
+                padding: 1pt 5pt !important;
+                border-radius: 2pt;
+            }
+
+            /* Pset blocks (form + saved card) — keep teal accent */
+            .pset-block {
+                background: #fafcfd !important;
+                border: 0.5pt solid #b8e0ec !important;
+                border-left: 2pt solid #006f8f !important;
+                padding: 5pt 6pt !important;
+                margin-bottom: 5pt !important;
+                page-break-inside: avoid;
+            }
+            .pset-block-header {
+                margin-bottom: 3pt !important;
+                gap: 4pt !important;
+            }
+            .pset-block-header label {
+                margin: 0 !important;
+                font-size: 7pt !important;
+                color: #5b6770 !important;
+            }
+            .pset-block-header .pset-name {
+                background: transparent !important;
+                border: none !important;
+                color: #005d78 !important;
+                padding: 1pt 0 !important;
+                font-size: 9pt !important;
+                font-weight: 700 !important;
+            }
+            .pset-block-header .remove-pset { display: none !important; }
+
+            /* Tables — light tint header keeps brand feel */
+            .steps-table th,
+            .steps-table td,
+            .steps-display-table th,
+            .steps-display-table td {
+                padding: 2pt 4pt !important;
+                border: 0.5pt solid #b8e0ec !important;
+                font-size: 8pt !important;
+            }
+            .steps-table th,
+            .steps-display-table th {
+                background: #b8e0ec !important;
+                color: #005d78 !important;
+                font-weight: 700 !important;
+                font-size: 7pt !important;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+            .steps-table td input {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                font-size: 9pt !important;
+                color: #2f363a !important;
+            }
+
+            /* Saved card Pset display — keep accent */
+            .pset-display {
+                background: #fafcfd !important;
+                border: 0.5pt solid #b8e0ec !important;
+                border-left: 2pt solid #006f8f !important;
+                page-break-inside: avoid;
+                padding: 5pt 6pt !important;
+                margin-top: 4pt !important;
+            }
+            .pset-display-name {
+                font-size: 8pt !important;
+                margin-bottom: 3pt !important;
+                color: #005d78 !important;
+                font-weight: 700 !important;
+            }
+
+            .empty { color: #5b6770 !important; }
+        }
+        }
+
+        /* Toast notifications */
+        #toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--ac-charcoal);
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 0.92rem;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.2s, transform 0.2s;
+            max-width: 320px;
+        }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { background: #1e7e4f; }
+        .toast.warn { background: #b8860b; }
+        .toast.error { background: #c0392b; }
+        .toast button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Briefly highlight a freshly-saved card */
+        @keyframes flash {
+            0% { background: var(--ac-tint); }
+            100% { background: #fff; }
+        }
+        .report-item.flash { animation: flash 1.6s ease-out; }
+
+        /* Briefly highlight the form after a clone */
+        @keyframes formflash {
+            0% { box-shadow: 0 0 0 4px var(--ac-tint); }
+            100% { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        }
+        form.flash { animation: formflash 1.2s ease-out; }
+
+        h2 { color: var(--ac-primary-dark); margin-top: 40px; font-weight: 600; }
+        #reportList { margin-top: 16px; }
+        .report-item {
+            background: #fff;
+            border: 1px solid #e5e7e8;
+            border-left: 5px solid var(--ac-primary);
+            padding: 18px 22px;
+            margin-bottom: 16px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .report-item .meta { font-size: 0.85rem; color: var(--ac-grey); margin-bottom: 10px; }
+        .report-item .group { margin-bottom: 10px; }
+        .report-item .group-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ac-primary-dark);
+            background: var(--ac-tint);
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-bottom: 4px;
+        }
+        .report-item .row { font-size: 0.92rem; }
+        .report-item .row strong { color: var(--ac-charcoal); }
+        .report-item .intervention {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #d1d4d7;
+        }
+        .report-item .intervention .type {
+            display: inline-block;
+            background: var(--ac-yellow);
+            color: var(--ac-charcoal);
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+        .report-item .notes { margin-top: 8px; color: var(--ac-grey); }
+
+        /* Optimization steps table (form + saved card) */
+        .steps-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            background: #fff;
+        }
+        .steps-table th,
+        .steps-table td {
+            padding: 8px 10px;
+            border: 1px solid #d1d4d7;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .steps-table th {
+            background: var(--ac-tint);
+            color: var(--ac-primary-dark);
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .steps-table td input {
+            border: none;
+            background: transparent;
+            padding: 4px 0;
+            width: 100%;
+            font-size: 0.92rem;
+        }
+        .steps-table td input:focus {
+            outline: 2px solid var(--ac-primary-light);
+            outline-offset: -2px;
+            background: #fff;
+            border-radius: 2px;
+        }
+        .steps-table td input::placeholder { color: #b0b5b9; }
+        .steps-table .col-step { width: 40%; }
+        .steps-table .col-before, .steps-table .col-after { width: 25%; }
+        .steps-table .col-remove { width: 10%; text-align: center; }
+        .steps-table .remove-row {
+            background: transparent;
+            color: #c0392b;
+            border: 1px solid transparent;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 3px;
+            transition: all 0.15s;
+        }
+        .steps-table .remove-row:hover {
+            background: #c0392b;
+            color: #fff;
+        }
+        .add-step-btn {
+            margin-top: 10px;
+        }
+        /* Saved card display of steps */
+        .steps-display-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+            font-size: 0.9rem;
+        }
+        .steps-display-table th,
+        .steps-display-table td {
+            padding: 6px 10px;
+            border: 1px solid #d1d4d7;
+            text-align: left;
+        }
+        .steps-display-table th {
+            background: #f0f0f0;
+            color: var(--ac-charcoal);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+
+        /* Pset block (form + saved card) */
+        .pset-block {
+            border: 1px solid var(--ac-tint);
+            border-left: 3px solid var(--ac-primary);
+            border-radius: 4px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            background: #fafcfd;
+        }
+        .pset-block-header {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .pset-block-header label {
+            flex-shrink: 0;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+        .pset-block-header .pset-name {
+            flex: 1;
+            min-width: 180px;
+            font-weight: 600;
+        }
+        .pset-block-header .remove-pset {
+            background: transparent;
+            color: #c0392b;
+            border: 1px solid #c0392b;
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 3px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .pset-block-header .remove-pset:hover {
+            background: #c0392b;
+            color: #fff;
+        }
+        .pset-block-footer {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pset-block .steps-table {
+            margin-top: 0;
+        }
+        /* Saved card display */
+        .pset-display {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: #f8f9f9;
+            border-left: 3px solid var(--ac-primary);
+            border-radius: 3px;
+        }
+        .pset-display-name {
+            font-weight: 700;
+            color: var(--ac-primary-dark);
+            margin-bottom: 4px;
+            font-size: 0.92rem;
+        }
+        @media (max-width: 600px) {
+            .pset-block-header { flex-direction: column; align-items: stretch; }
+            .pset-block-header .pset-name { min-width: 0; }
+            .pset-block-header .remove-pset { width: 100%; }
+        }
+        .empty { color: var(--ac-grey); font-style: italic; }
+        .reports-toolbar { margin: 12px 0; }
+        button.danger { color: #c0392b; border-color: #c0392b; }
+        button.danger:hover { background: #fdecea; }
+        .report-item .report-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .report-item .delete-btn {
+            background: transparent;
+            color: #c0392b;
+            border: 1px solid #c0392b;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .report-item .delete-btn:hover { background: #c0392b; color: #fff; }
+        .report-item .clone-btn {
+            background: transparent;
+            color: var(--ac-primary);
+            border: 1px solid var(--ac-primary);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .report-item .clone-btn:hover { background: var(--ac-tint); }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.3rem; }
+            .container { padding: 0 12px; }
+            form { padding: 18px; }
+            .grid { grid-template-columns: 1fr; gap: 0; }
+            .actions { flex-direction: column; }
+            button { width: 100%; }
+            .report-item { padding: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="toast" aria-live="polite" aria-atomic="true"></div>
+    <header>
+        <div class="inner">
+            <h1>Atlas Copco Tightening Intervention</h1>
+            <div class="subtitle">Service Report Generator</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <form id="interventionForm">
+            <div class="section-title">Report</div>
+            <div class="grid">
+                <div class="field">
+                    <label for="reportId">Report ID (unique)</label>
+                    <input type="text" id="reportId" readonly>
+                </div>
+                <div class="field">
+                    <label for="cloneSource">Clone from saved report</label>
+                    <div class="inline-group">
+                        <select id="cloneSource">
+                            <option value="">— Select a report to clone —</option>
+                        </select>
+                        <button type="button" class="secondary" id="cloneFromSelectBtn">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            Clone
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">Customer</div>
+            <div class="grid">
+                <div class="field full">
+                    <label for="customerName">Customer Name</label>
+                    <input type="text" id="customerName" required>
+                </div>
+                <div class="field">
+                    <label for="customerContact">Contact Name</label>
+                    <input type="text" id="customerContact">
+                </div>
+                <div class="field">
+                    <label for="customerPhone">Phone</label>
+                    <input type="tel" id="customerPhone">
+                </div>
+                <div class="field">
+                    <label for="customerEmail">Email</label>
+                    <input type="email" id="customerEmail">
+                </div>
+                <div class="field full">
+                    <label for="customerAddress">Address</label>
+                    <textarea id="customerAddress" rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="section-title">Technician</div>
+            <div class="grid">
+                <div class="field">
+                    <label for="technicianName">Technician Name</label>
+                    <input type="text" id="technicianName" required>
+                </div>
+                <div class="field">
+                    <label for="technicianEmail">Email</label>
+                    <input type="email" id="technicianEmail">
+                </div>
+            </div>
+
+            <div class="section-title">Equipment</div>
+            <div class="grid">
+                <div class="field">
+                    <label for="controller">Controller</label>
+                    <input type="text" id="controller">
+                </div>
+                <div class="field">
+                    <label for="controllerSerial">Controller Serial</label>
+                    <input type="text" id="controllerSerial">
+                </div>
+                <div class="field">
+                    <label for="controllerFirmware">Controller Firmware</label>
+                    <input type="text" id="controllerFirmware" placeholder="e.g. v3.2.1">
+                </div>
+                <div class="field">
+                    <label for="toolType">Tool / Spindle Type</label>
+                    <input type="text" id="toolType">
+                </div>
+                <div class="field">
+                    <label for="toolSerial">Tool / Spindle Serial</label>
+                    <input type="text" id="toolSerial" required>
+                </div>
+            </div>
+
+            <div class="section-title">Intervention</div>
+            <div class="field">
+                <label for="interventionType">Intervention Type</label>
+                <select id="interventionType">
+                    <option value="Firmware Upgrade">Firmware Upgrade</option>
+                    <option value="Tightening Program Optimization">Tightening Program Optimization</option>
+                    <option value="Calibration">Calibration</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="field" id="optimizationSection" hidden>
+                <label>Optimization Steps</label>
+                <div id="psetsContainer"></div>
+                <button type="button" class="secondary add-step-btn" id="addPsetBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Pset
+                </button>
+            </div>
+            <div class="field">
+                <label for="notes">Notes</label>
+                <textarea id="notes" rows="4"></textarea>
+            </div>
+
+            <div class="actions">
+                <button type="submit">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Save Report
+                </button>
+                <button type="reset" class="secondary">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Clear
+                </button>
+                <button type="button" class="secondary" id="saveJsonBtn">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Save to JSON
+                </button>
+                <button type="button" class="secondary" id="loadJsonBtn">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Load from JSON
+                </button>
+                <button type="button" class="secondary" id="printBtn">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print to PDF
+                </button>
+                <input type="file" id="jsonFileInput" accept="application/json,.json" aria-hidden="true">
+            </div>
+        </form>
+
+        <h2>Saved Reports</h2>
+        <div class="reports-toolbar">
+            <button type="button" class="secondary danger" id="clearAllBtn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Clear All
+            </button>
+        </div>
+        <div id="reportList"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('interventionForm');
+        const reportList = document.getElementById('reportList');
+        const reportIdEl = document.getElementById('reportId');
+        const cloneSourceEl = document.getElementById('cloneSource');
+        let lastSavedReport = null;
+
+        function val(v) { return v && v.trim() ? v : '—'; }
+
+        function newId() {
+            // crypto.randomUUID requires a secure context (HTTPS/localhost) and
+            // isn't available in older browsers. Try it, then fall back to
+            // crypto.getRandomValues (RFC 4122 v4 layout), then to Math.random.
+            try {
+                if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+                    return crypto.randomUUID();
+                }
+            } catch (_) { /* fall through */ }
+            try {
+                if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+                    const bytes = new Uint8Array(16);
+                    crypto.getRandomValues(bytes);
+                    bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+                    bytes[8] = (bytes[8] & 0x3f) | 0x80; // RFC 4122 variant
+                    let hex = '';
+                    for (let i = 0; i < 16; i++) {
+                        hex += (bytes[i] < 16 ? '0' : '') + bytes[i].toString(16);
+                    }
+                    return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-' +
+                           hex.slice(12, 16) + '-' + hex.slice(16, 20) + '-' + hex.slice(20);
+                }
+            } catch (_) { /* fall through */ }
+            // Last resort — high-entropy timestamp + two random chunks
+            return 'rpt-' + Date.now().toString(36) + '-' +
+                   Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        }
+
+        function setReportId(id) {
+            reportIdEl.value = id || newId();
+        }
+
+        // Safe localStorage wrapper: Safari private mode and quota errors throw.
+        // Fall back gracefully so the app still works in-memory.
+        const storage = {
+            get(key, fallback) {
+                try { return localStorage.getItem(key) || fallback; }
+                catch (_) { return fallback; }
+            },
+            set(key, value) {
+                try { localStorage.setItem(key, value); return true; }
+                catch (_) { return false; }
+            },
+            remove(key) {
+                try { localStorage.removeItem(key); }
+                catch (_) { /* no-op */ }
+            }
+        };
+
+        function getReports() { return JSON.parse(storage.get('reports', '[]')); }
+        function saveReports(reports) { storage.set('reports', JSON.stringify(reports)); }
+        function clearReports() { storage.remove('reports'); }
+
+        // Toast notifications — give the user visible feedback for every action
+        const toastRoot = document.getElementById('toast');
+        function showToast(message, kind) {
+            const el = document.createElement('div');
+            el.className = 'toast' + (kind ? ' ' + kind : '');
+            el.textContent = message;
+            toastRoot.appendChild(el);
+            // Trigger transition on next frame
+            requestAnimationFrame(() => el.classList.add('show'));
+            setTimeout(() => {
+                el.classList.remove('show');
+                setTimeout(() => el.remove(), 250);
+            }, 2600);
+        }
+
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        function loadReports() {
+            const reports = getReports();
+            // Backfill unique IDs for reports saved before the id field existed
+            let changed = false;
+            reports.forEach(r => {
+                if (!r.id) {
+                    r.id = newId();
+                    changed = true;
+                }
+            });
+            if (changed) saveReports(reports);
+            refreshCloneSource();
+            if (!reports.length) {
+                reportList.innerHTML = '<p class="empty">No reports saved yet.</p>';
+                return;
+            }
+            reportList.innerHTML = reports.map((r) => `
+                <div class="report-item">
+                    <div class="report-actions">
+                        <button type="button" class="clone-btn" data-id="${escapeHtml(r.id)}">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            Clone
+                        </button>
+                        <button type="button" class="delete-btn" data-id="${escapeHtml(r.id)}">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            Delete
+                        </button>
+                    </div>
+                    <div class="meta">ID: ${escapeHtml(r.id) || '—'} &nbsp;•&nbsp; ${escapeHtml(r.date)}</div>
+                    <div class="group">
+                        <div class="group-label">Customer</div>
+                        <div class="row"><strong>${val(r.customer)}</strong></div>
+                        <div class="row">Contact: ${val(r.customerContact)}</div>
+                        <div class="row">Phone: ${val(r.customerPhone)} &nbsp;|&nbsp; Email: ${val(r.customerEmail)}</div>
+                        <div class="row">Address: ${val(r.customerAddress)}</div>
+                    </div>
+                    <div class="group">
+                        <div class="group-label">Technician</div>
+                        <div class="row"><strong>${val(r.technician)}</strong> &nbsp;|&nbsp; Email: ${val(r.technicianEmail)}</div>
+                    </div>
+                    <div class="group">
+                        <div class="group-label">Equipment</div>
+                        <div class="row">Controller: ${val(r.controller)} &nbsp;|&nbsp; Serial: ${val(r.controllerSerial)} &nbsp;|&nbsp; FW: ${val(r.controllerFirmware)}</div>
+                        <div class="row">Tool/Spindle: ${val(r.toolType)} &nbsp;|&nbsp; Serial: ${val(r.toolSerial)}</div>
+                    </div>
+                    <div class="intervention">
+                        <span class="type">${val(r.type)}</span>
+                        <p class="notes">${val(r.notes)}</p>
+                        ${r.steps && r.steps.length ? renderPsetsDisplay(r.steps) : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function refreshCloneSource() {
+            const reports = getReports();
+            const cloneBtn = document.getElementById('cloneFromSelectBtn');
+            if (!reports.length) {
+                cloneSourceEl.innerHTML = '<option value="">— No saved reports yet —</option>';
+                cloneSourceEl.disabled = true;
+                if (cloneBtn) cloneBtn.disabled = true;
+                return;
+            }
+            cloneSourceEl.disabled = false;
+            if (cloneBtn) cloneBtn.disabled = false;
+            cloneSourceEl.innerHTML = '<option value="">— Select a report to clone —</option>' +
+                reports.map(r => {
+                    const label = `${r.date} — ${val(r.customer)} (${(r.id || '').slice(0, 8)})`;
+                    return `<option value="${escapeHtml(r.id)}">${escapeHtml(label)}</option>`;
+                }).join('');
+        }
+
+        function cloneReportById(id) {
+            if (!id) return;
+            const reports = getReports();
+            const report = reports.find(r => r.id === id);
+            if (!report) return;
+            fillForm(report);
+            // A clone is a new report — give it a fresh unique ID
+            setReportId();
+            cloneSourceEl.value = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Visible feedback
+            showToast('✓ Form filled from cloned report (new ID assigned)', 'success');
+            form.classList.remove('flash');
+            void form.offsetWidth;
+            form.classList.add('flash');
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newReport = collectFormData();
+            // Use whatever ID is currently shown in the form (auto-managed)
+            newReport.id = reportIdEl.value || newId();
+            newReport.date = new Date().toLocaleString();
+            // Attach optimization steps (only meaningful when intervention type is optimization)
+            newReport.steps = collectSteps();
+            const reports = getReports();
+            reports.push(newReport);
+            saveReports(reports);
+            lastSavedReport = newReport;
+            loadReports();
+            // Prep the form for the next entry
+            setReportId();
+            // Visible feedback: toast + scroll to the new card + flash highlight
+            showToast('✓ Report saved', 'success');
+            const newCard = document.querySelector(`.report-item [data-id="${newReport.id}"]`)?.closest('.report-item');
+            if (newCard) {
+                newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                newCard.classList.remove('flash');
+                // Re-trigger animation
+                void newCard.offsetWidth;
+                newCard.classList.add('flash');
+            }
+        });
+
+        // Regenerate the unique ID after a Clear/reset so the next report starts fresh
+        form.addEventListener('reset', () => {
+            setTimeout(setReportId, 0);
+        });
+
+        // Clone button next to the dropdown
+        document.getElementById('cloneFromSelectBtn').addEventListener('click', () => {
+            if (!cloneSourceEl.value) {
+                showToast('Pick a saved report from the dropdown first', 'warn');
+                return;
+            }
+            cloneReportById(cloneSourceEl.value);
+        });
+
+        // Field id map for save/load JSON
+        const fieldMap = {
+            id: 'reportId',
+            customer: 'customerName',
+            customerContact: 'customerContact',
+            customerPhone: 'customerPhone',
+            customerEmail: 'customerEmail',
+            customerAddress: 'customerAddress',
+            technician: 'technicianName',
+            technicianEmail: 'technicianEmail',
+            controller: 'controller',
+            controllerSerial: 'controllerSerial',
+            controllerFirmware: 'controllerFirmware',
+            toolType: 'toolType',
+            toolSerial: 'toolSerial',
+            type: 'interventionType',
+            notes: 'notes'
+        };
+
+        function collectFormData() {
+            const data = {};
+            for (const [key, id] of Object.entries(fieldMap)) {
+                data[key] = document.getElementById(id).value;
+            }
+            return data;
+        }
+
+        function fillForm(data) {
+            for (const [key, id] of Object.entries(fieldMap)) {
+                const el = document.getElementById(id);
+                if (el && data[key] !== undefined) el.value = data[key];
+            }
+            // Steps are dynamic — not in fieldMap
+            if (Array.isArray(data.steps)) {
+                fillSteps(data.steps);
+            } else {
+                fillSteps([]);
+            }
+            updateOptimizationVisibility();
+        }
+
+        // ===== Optimization Psets (each Pset has a name + its own steps table) =====
+        const interventionTypeEl = document.getElementById('interventionType');
+        const optimizationSection = document.getElementById('optimizationSection');
+        const psetsContainer = document.getElementById('psetsContainer');
+
+        function updateOptimizationVisibility() {
+            const isOpt = interventionTypeEl.value === 'Tightening Program Optimization';
+            optimizationSection.hidden = !isOpt;
+            if (!isOpt) {
+                // Clear psets when switching away so the saved report isn't polluted
+                fillSteps([]);
+            }
+        }
+
+        function addStepRowToPset(rowsBody, data) {
+            data = data || {};
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="col-step"><input type="text" class="step-name" value="${escapeHtml(data.step || '')}" placeholder="e.g. Torque step 3"></td>
+                <td class="col-before"><input type="text" class="step-before" value="${escapeHtml(data.before || '')}" placeholder="e.g. 45 Nm"></td>
+                <td class="col-after"><input type="text" class="step-after" value="${escapeHtml(data.after || '')}" placeholder="e.g. 42 Nm"></td>
+                <td class="col-remove"><button type="button" class="remove-row">Remove</button></td>
+            `;
+            tr.querySelector('.remove-row').addEventListener('click', () => {
+                tr.remove();
+                if (!rowsBody.querySelector('tr')) {
+                    addStepRowToPset(rowsBody);
+                }
+            });
+            rowsBody.appendChild(tr);
+        }
+
+        function addPset(data) {
+            data = data || {};
+            const block = document.createElement('div');
+            block.className = 'pset-block';
+            block.innerHTML = `
+                <div class="pset-block-header">
+                    <label>Pset name</label>
+                    <input type="text" class="pset-name" value="${escapeHtml(data.pset || '')}" placeholder="e.g. Joint 1 — Wheel hub">
+                    <button type="button" class="remove-pset">Remove Pset</button>
+                </div>
+                <table class="steps-table">
+                    <thead>
+                        <tr>
+                            <th class="col-step">Step name</th>
+                            <th class="col-before">Value before</th>
+                            <th class="col-after">Value after</th>
+                            <th class="col-remove"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="pset-rows"></tbody>
+                </table>
+                <div class="pset-block-footer">
+                    <button type="button" class="secondary add-step-btn add-step-in-pset">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Step
+                    </button>
+                </div>
+            `;
+
+            const rowsBody = block.querySelector('.pset-rows');
+
+            block.querySelector('.remove-pset').addEventListener('click', () => {
+                block.remove();
+                ensureAtLeastOnePset();
+            });
+            block.querySelector('.add-step-in-pset').addEventListener('click', () => {
+                addStepRowToPset(rowsBody);
+            });
+
+            // Populate rows if provided
+            if (Array.isArray(data.rows) && data.rows.length) {
+                data.rows.forEach(r => addStepRowToPset(rowsBody, r));
+            } else {
+                addStepRowToPset(rowsBody);
+            }
+
+            psetsContainer.appendChild(block);
+        }
+
+        function ensureAtLeastOnePset() {
+            if (!psetsContainer.querySelector('.pset-block')) {
+                addPset();
+            }
+        }
+
+        function fillSteps(steps) {
+            psetsContainer.innerHTML = '';
+            if (Array.isArray(steps) && steps.length) {
+                // Detect legacy flat format: [{step, before, after}, ...]
+                const isLegacy = !steps[0].pset && !steps[0].rows && (steps[0].step !== undefined || steps[0].before !== undefined || steps[0].after !== undefined);
+                if (isLegacy) {
+                    // Wrap old flat rows into a single default Pset
+                    addPset({ pset: '', rows: steps });
+                } else {
+                    steps.forEach(p => addPset(p));
+                }
+            } else {
+                addPset();
+            }
+        }
+
+        function collectSteps() {
+            const blocks = Array.from(psetsContainer.querySelectorAll('.pset-block'));
+            return blocks.map(block => {
+                const psetName = block.querySelector('.pset-name').value.trim();
+                const rows = Array.from(block.querySelectorAll('.pset-rows tr')).map(tr => ({
+                    step: tr.querySelector('.step-name').value.trim(),
+                    before: tr.querySelector('.step-before').value.trim(),
+                    after: tr.querySelector('.step-after').value.trim()
+                })).filter(r => r.step || r.before || r.after); // skip completely empty rows
+                return { pset: psetName, rows };
+            }).filter(p => p.pset || p.rows.length); // skip completely empty Psets
+        }
+
+        // Render Psets inside a saved report card
+        function renderPsetsDisplay(steps) {
+            // Detect legacy flat format at the array level: [{step, before, after}, ...]
+            // vs new format: [{pset, rows}, ...]
+            const isLegacyArray = Array.isArray(steps) && steps.length && !steps[0].pset && !steps[0].rows;
+
+            if (isLegacyArray) {
+                // Wrap all legacy rows into a single unnamed Pset display
+                return `
+                    <div class="pset-display">
+                        <div class="pset-display-name"><em>(unnamed Pset)</em></div>
+                        <table class="steps-display-table">
+                            <thead>
+                                <tr><th>Step</th><th>Before</th><th>After</th></tr>
+                            </thead>
+                            <tbody>
+                                ${steps.map(s => `
+                                    <tr>
+                                        <td>${escapeHtml(s.step) || '—'}</td>
+                                        <td>${escapeHtml(s.before) || '—'}</td>
+                                        <td>${escapeHtml(s.after) || '—'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // New format: each entry is a Pset
+            return steps.map(p => {
+                const psetName = p.pset || '';
+                const rows = p.rows || [];
+                return `
+                    <div class="pset-display">
+                        <div class="pset-display-name">${escapeHtml(psetName) || '<em>(unnamed Pset)</em>'}</div>
+                        ${rows.length ? `
+                            <table class="steps-display-table">
+                                <thead>
+                                    <tr><th>Step</th><th>Before</th><th>After</th></tr>
+                                </thead>
+                                <tbody>
+                                    ${rows.map(s => `
+                                        <tr>
+                                            <td>${escapeHtml(s.step) || '—'}</td>
+                                            <td>${escapeHtml(s.before) || '—'}</td>
+                                            <td>${escapeHtml(s.after) || '—'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        interventionTypeEl.addEventListener('change', updateOptimizationVisibility);
+        document.getElementById('addPsetBtn').addEventListener('click', () => addPset());
+
+        // Save current form data to a JSON file
+        document.getElementById('saveJsonBtn').addEventListener('click', () => {
+            let data = collectFormData();
+            // Attach dynamic steps table (not in fieldMap)
+            data.steps = collectSteps();
+            const hasData = Object.values(data).some(v => v && v.trim()) || (data.steps && data.steps.length);
+            if (!hasData && lastSavedReport) data = { ...lastSavedReport };
+            data.savedAt = new Date().toLocaleString();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const stamp = new Date().toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `intervention-${stamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // Load form data from a JSON file
+        const jsonFileInput = document.getElementById('jsonFileInput');
+        document.getElementById('loadJsonBtn').addEventListener('click', () => {
+            // Reset value first so picking the same file twice still fires 'change'
+            jsonFileInput.value = '';
+            jsonFileInput.click();
+        });
+        jsonFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    fillForm(data);
+                    showToast('✓ Form loaded from JSON', 'success');
+                } catch (err) {
+                    showToast('Invalid JSON file: ' + err.message, 'error');
+                }
+            };
+            reader.onerror = () => showToast('Failed to read file', 'error');
+            reader.readAsText(file);
+            jsonFileInput.value = '';
+        });
+
+        // Print to PDF — uses the browser's built-in print dialog (Cmd/Ctrl+P),
+        // and the @media print CSS strips buttons and shows a clean layout.
+        document.getElementById('printBtn').addEventListener('click', () => {
+            window.print();
+        });
+
+        // Delete a single saved report / clone a report into the form
+        reportList.addEventListener('click', (e) => {
+            const delBtn = e.target.closest('.delete-btn');
+            if (delBtn) {
+                const id = delBtn.dataset.id;
+                if (confirm('Delete this report?')) {
+                    const reports = getReports();
+                    const idx = reports.findIndex(r => r.id === id);
+                    if (idx !== -1) {
+                        reports.splice(idx, 1);
+                        saveReports(reports);
+                        loadReports();
+                        showToast('Report deleted', 'warn');
+                    }
+                }
+                return;
+            }
+            const cloneBtn = e.target.closest('.clone-btn');
+            if (cloneBtn) {
+                cloneReportById(cloneBtn.dataset.id);
+            }
+        });
+
+        // Clear all saved reports
+        document.getElementById('clearAllBtn').addEventListener('click', () => {
+            if (confirm('Delete ALL saved reports? This cannot be undone.')) {
+                clearReports();
+                loadReports();
+                showToast('All reports deleted', 'warn');
+            }
+        });
+
+        // Initial setup: ensure the form has a unique ID and the dropdown is populated
+        setReportId();
+        updateOptimizationVisibility();
+        loadReports();
+    </script>
+</body>
+</html>
