@@ -45,6 +45,9 @@
             color: #fff;
             padding: 24px 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         header .inner { max-width: 900px; margin: auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
         header .header-text { flex: 1 1 auto; min-width: 0; }
@@ -743,6 +746,7 @@
             margin-top: 10px;
         }
         /* Saved card display of steps */
+        .steps-display-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 6px;
@@ -2122,7 +2126,7 @@
         // Save Report does NOT call this — signatures persist with the report and on the form.
         function clearAllSignatures() {
             const clearCustomerBtn = document.getElementById('clearCustomerSig');
-            const clearTechnicianBtn = document.getElementById('clearTechnicianBtn');
+            const clearTechnicianBtn = document.getElementById('clearTechnicianSig');
             if (clearCustomerBtn) clearCustomerBtn.click();
             if (clearTechnicianBtn) clearTechnicianBtn.click();
             enableSignaturesEl.checked = false;
@@ -2559,7 +2563,7 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         document.removeEventListener('keydown', onKey);
     }
     function onDocClick(e) {
-        if (!popup.contains(e.target) && e.target !== anchorEl && !anchorEl.contains(e.target) && e.target !== btnEl) {
+        if (!popup.contains(e.target) && e.target !== anchorEl && !anchorEl.contains(e.target)) {
             close();
         }
     }
