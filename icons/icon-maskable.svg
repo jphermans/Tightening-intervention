@@ -5,17 +5,17 @@
      important content stays inside the safe zone. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <!-- Solid teal background that fills the entire viewport (masked area) -->
-  <rect width="512" height="512" fill="#3BABCB"/>
+  <rect width="512" height="512" fill="#0092BC"/>
   <!-- Content stays inside the safe zone (51–461 on each axis) -->
   <g transform="translate(256 230)" fill="#ffffff">
     <!-- Wrench head (left circle with notch) -->
     <circle cx="-60" cy="0" r="44" fill="#ffffff"/>
-    <circle cx="-60" cy="0" r="22" fill="#3BABCB"/>
+    <circle cx="-60" cy="0" r="22" fill="#0092BC"/>
     <!-- Wrench handle -->
     <rect x="-36" y="-12" width="140" height="24" rx="6" ry="6" fill="#ffffff"/>
     <!-- Wrench right tip -->
     <circle cx="124" cy="0" r="34" fill="#ffffff"/>
-    <circle cx="124" cy="0" r="16" fill="#3BABCB"/>
+    <circle cx="124" cy="0" r="16" fill="#0092BC"/>
   </g>
   <text x="256" y="380" text-anchor="middle"
         font-family="Segoe UI, Helvetica, Arial, sans-serif"

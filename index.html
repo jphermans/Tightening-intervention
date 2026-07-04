@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#3BABCB">
+    <meta name="theme-color" content="#0092BC">
     <meta name="description" content="Atlas Copco Tightening Intervention Report — generate, sign, and print service reports. Works offline once installed.">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,16 +16,17 @@
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
-    <link rel="mask-icon" href="icons/icon.svg" color="#3BABCB">
+    <link rel="mask-icon" href="icons/icon.svg" color="#0092BC">
     <title>Atlas Copco Tightening Intervention Report</title>
     <style>
         :root {
-            /* Atlas Copco brand blue — sampled from the official logo asset
-               (icons/atlas-copco-logo.png) so the chrome, accent rules and
-               logo all share the same teal. */
-            --ac-primary: #3BABCB;
-            --ac-primary-dark: #2A8AA8;
-            --ac-primary-light: #5BC0DD;
+            /* Atlas Copco brand blue — official RGB 0,146,188 = #0092BC
+               (sampled from icons/atlas-copco-logo.png to confirm).
+               The whole chrome palette (header, accents, buttons, borders)
+               is derived from this single brand color. */
+            --ac-primary: #0092BC;
+            --ac-primary-dark: #007399;
+            --ac-primary-light: #33AED0;
             --ac-tint: #CDEBF4;
             --ac-yellow: #ffcd00;
             --ac-charcoal: #2f363a;
@@ -165,12 +166,12 @@
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
             /* Colored brand bar at the top of the first printed page — mirrors the
-               web page header (Atlas Copco brand blue #3BABCB background,
+               web page header (Atlas Copco brand blue #0092BC background,
                white text, light-tint subtitle). Bleeds to page edges via
                negative margins that cancel the body padding. */
             header {
                 display: block !important;
-                background: #3BABCB !important;
+                background: #0092BC !important;
                 color: #fff !important;
                 padding: 16pt 1.2cm !important;
                 margin: 0 -1.2cm 10pt !important;
@@ -217,7 +218,7 @@
 
             /* Compact section titles — keep with following content, keep brand color */
             .section-title {
-                color: #2A8AA8 !important;
+                color: #007399 !important;
                 border-bottom: 0.75pt solid #CDEBF4 !important;
                 margin: 10pt 0 3pt !important;
                 padding-bottom: 2pt !important;
@@ -272,13 +273,13 @@
             .inline-group { display: none !important; }
 
             /* Section title for saved reports — keep brand color */
-            h2 { color: #2A8AA8 !important; margin-top: 12pt !important; font-size: 11pt !important; page-break-after: avoid; }
+            h2 { color: #007399 !important; margin-top: 12pt !important; font-size: 11pt !important; page-break-after: avoid; }
 
             /* Saved report cards — keep brand accent on the left bar */
             .report-item {
                 box-shadow: none !important;
                 border: 0.5pt solid #d1d4d7 !important;
-                border-left: 2pt solid #3BABCB !important;
+                border-left: 2pt solid #0092BC !important;
                 padding: 6pt 8pt !important;
                 margin-bottom: 6pt !important;
                 page-break-inside: avoid;
@@ -287,7 +288,7 @@
             .report-item .meta { color: #5b6770 !important; font-size: 8pt !important; margin-bottom: 4pt !important; }
             .report-item .group-label {
                 background: #CDEBF4 !important;
-                color: #2A8AA8 !important;
+                color: #007399 !important;
                 font-size: 7pt !important;
                 font-weight: 700 !important;
                 padding: 1pt 4pt !important;
@@ -312,7 +313,7 @@
             .time-table {
                 background: #fafcfd !important;
                 border: 0.5pt solid #CDEBF4 !important;
-                border-left: 2pt solid #3BABCB !important;
+                border-left: 2pt solid #0092BC !important;
                 padding: 5pt 6pt !important;
                 margin-bottom: 5pt !important;
                 page-break-inside: avoid;
@@ -329,7 +330,7 @@
             .pset-block-header .pset-name {
                 background: transparent !important;
                 border: none !important;
-                color: #2A8AA8 !important;
+                color: #007399 !important;
                 padding: 1pt 0 !important;
                 font-size: 9pt !important;
                 font-weight: 700 !important;
@@ -348,7 +349,7 @@
             .steps-table th,
             .steps-display-table th {
                 background: #CDEBF4 !important;
-                color: #2A8AA8 !important;
+                color: #007399 !important;
                 font-weight: 700 !important;
                 font-size: 7pt !important;
                 text-transform: uppercase;
@@ -366,7 +367,7 @@
             .pset-display {
                 background: #fafcfd !important;
                 border: 0.5pt solid #CDEBF4 !important;
-                border-left: 2pt solid #3BABCB !important;
+                border-left: 2pt solid #0092BC !important;
                 page-break-inside: avoid;
                 padding: 5pt 6pt !important;
                 margin-top: 4pt !important;
@@ -374,7 +375,7 @@
             .pset-display-name {
                 font-size: 8pt !important;
                 margin-bottom: 3pt !important;
-                color: #2A8AA8 !important;
+                color: #007399 !important;
                 font-weight: 700 !important;
             }
 
@@ -648,7 +649,7 @@
             }
             .time-table th {
                 background: #CDEBF4 !important;
-                color: #2A8AA8 !important;
+                color: #007399 !important;
                 font-weight: 700 !important;
                 font-size: 7pt !important;
                 text-transform: uppercase;
@@ -662,14 +663,14 @@
             }
             .time-table tfoot td {
                 background: #fafcfd !important;
-                border-top: 1pt solid #3BABCB !important;
+                border-top: 1pt solid #0092BC !important;
             }
             .time-table tfoot .time-total-label {
-                color: #2A8AA8 !important;
+                color: #007399 !important;
                 font-size: 7pt !important;
             }
             .time-table tfoot .time-total-value {
-                color: #2A8AA8 !important;
+                color: #007399 !important;
                 font-size: 9pt !important;
             }
         }
