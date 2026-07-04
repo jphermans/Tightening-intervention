@@ -389,6 +389,55 @@
                 page-break-inside: avoid;
                 margin-top: 12pt;
             }
+
+            /* Attachments in print: hide toggle/dropzone, show a clean stacked image list */
+            .attachment-toggle-row,
+            .attachments-toolbar,
+            .attachment-dropzone,
+            .attachment-card .attachment-meta,
+            .attachment-card .attachment-remove { display: none !important; }
+            .attachment-card .attachment-thumb-wrap {
+                height: auto !important;
+                background: #fff !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+            .attachment-card .attachment-thumb {
+                max-height: 380pt !important;
+                max-width: 100% !important;
+                width: auto !important;
+            }
+            .attachment-grid {
+                display: block !important;
+            }
+            .attachment-card {
+                display: block !important;
+                border: none !important;
+                border-top: 0.5pt solid #d1d4d7 !important;
+                border-radius: 0 !important;
+                background: transparent !important;
+                margin-top: 8pt !important;
+                padding-top: 6pt !important;
+                page-break-inside: avoid;
+            }
+            .attachment-card:first-child {
+                border-top: none !important;
+                margin-top: 0 !important;
+            }
+            .attachment-card .attachment-caption-print {
+                display: block !important;
+                font-size: 9pt !important;
+                color: #2f363a !important;
+                margin-top: 4pt !important;
+                font-style: italic;
+            }
+            #attachmentsSection:not([data-print="on"]) { display: none !important; }
+            #attachmentsSection[data-print="on"] {
+                display: block !important;
+                margin-top: 10pt;
+            }
+            /* Hide saved-card attachments on the printed page (form view only) */
+            .card-attachments { display: none !important; }
             .signature-block canvas { display: none !important; }
             .signature-block .sig-print-img {
                 display: block !important;
@@ -1158,6 +1207,185 @@
             .signatures-grid { grid-template-columns: 1fr; }
         }
 
+        /* Attachments / images section (between Notes and Work Time) */
+        .attachment-toggle-row {
+            margin-top: 20px;
+            padding: 12px 14px;
+            background: #fafcfd;
+            border: 1px solid var(--ac-tint);
+            border-radius: 4px;
+        }
+        .attachment-toggle-row label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin: 0;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 0.92rem;
+            color: var(--ac-charcoal);
+            font-weight: 600;
+        }
+        .attachment-toggle-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .attachment-hint {
+            margin-top: 4px;
+            margin-left: 24px;
+            font-size: 0.78rem;
+            color: var(--ac-grey);
+            font-weight: 400;
+        }
+        .attachments-toolbar {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .attachments-toolbar button { white-space: nowrap; }
+        .attachment-count {
+            font-size: 0.85rem;
+            color: var(--ac-grey);
+        }
+        /* The drop-zone is a large dashed area that highlights on drag-over.
+           Clicking it triggers the hidden file input. */
+        .attachment-dropzone {
+            margin-top: 12px;
+            border: 2px dashed var(--ac-tint);
+            border-radius: 6px;
+            padding: 28px 16px;
+            text-align: center;
+            color: var(--ac-grey);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            background: #fafcfd;
+        }
+        .attachment-dropzone:hover,
+        .attachment-dropzone.dragover {
+            background: var(--ac-tint);
+            border-color: var(--ac-primary);
+            color: var(--ac-primary-dark);
+        }
+        .attachment-grid {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .attachment-card {
+            border: 1px solid #e5e7e8;
+            border-radius: 4px;
+            background: #fff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .attachment-card .attachment-thumb-wrap {
+            background: #fafcfd;
+            padding: 6px;
+            border-bottom: 1px solid #e5e7e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 140px;
+            overflow: hidden;
+        }
+        .attachment-card .attachment-thumb {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .attachment-card .attachment-meta {
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .attachment-card .attachment-caption {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #d1d4d7;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--ac-charcoal);
+            background: #f8f9f9;
+        }
+        .attachment-card .attachment-caption:focus {
+            border-color: var(--ac-primary);
+            background: #fff;
+            outline: none;
+        }
+        /* The print-only caption element mirrors the input value on the printed PDF.
+           Hidden on screen via @media print rules above. */
+        .attachment-card .attachment-caption-print { display: none; }
+        .attachment-card .attachment-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--ac-grey);
+        }
+        .attachment-card .attachment-remove {
+            background: transparent;
+            border: 1px solid #d1d4d7;
+            color: var(--ac-grey);
+            padding: 4px 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .attachment-card .attachment-remove:hover {
+            background: #c0392b;
+            color: #fff;
+            border-color: #c0392b;
+        }
+        /* Saved-card attachments display — visible in form view, hidden in print */
+        .card-attachments {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #d1d4d7;
+        }
+        .card-attachments-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ac-primary-dark);
+            background: var(--ac-tint);
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        .card-attachments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+        }
+        .card-attachment img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 3px;
+            border: 1px solid #e5e7e8;
+        }
+        .card-attachment .card-attachment-caption {
+            margin-top: 4px;
+            font-size: 0.78rem;
+            color: var(--ac-charcoal);
+        }
+
         /* Saved-card signature display — visible in form view, hidden in print */
         .card-signatures {
             margin-top: 12px;
@@ -1420,6 +1648,28 @@
             <div class="field">
                 <label for="notes" title="Free-form notes: root cause, parts replaced, recommendations, follow-up actions, anything the customer should know.">Notes</label>
                 <textarea id="notes" rows="4"></textarea>
+            </div>
+
+            <div class="attachment-toggle-row">
+                <label title="Show or hide the image / torque-graph attachments section. Each image is stored as base64 and survives Save Report, JSON export, and the printed PDF.">
+                    <input type="checkbox" id="enableAttachments">
+                    <span>Add images / torque graphs</span>
+                </label>
+                <div class="attachment-hint">Attach photos, screenshots, or torque graphs to document the intervention. Stored with the report, included in the printed PDF, and exported with the JSON backup.</div>
+            </div>
+
+            <div id="attachmentsSection" hidden>
+                <h3 class="section-title" style="margin-top: 24px;">Images &amp; Graphs</h3>
+                <div class="attachments-toolbar">
+                    <button type="button" class="secondary" id="addAttachmentBtn" title="Pick one or more image files from your device.">Add image…</button>
+                    <input type="file" id="attachmentFileInput" accept="image/*" multiple hidden>
+                    <span class="attachment-count" id="attachmentCount">0 images</span>
+                </div>
+                <div class="attachment-dropzone" id="attachmentDropzone" title="Click to browse, or drop image files here.">
+                    <strong>Drop images here</strong> &nbsp;or click to browse
+                    <div style="font-size: 0.78rem; margin-top: 6px; opacity: 0.8;">PNG, JPG, GIF, SVG, WebP — up to ~5 MB each</div>
+                </div>
+                <div id="attachmentGrid" class="attachment-grid"></div>
             </div>
 
             <div class="section-title">Work Time</div>
@@ -1756,6 +2006,7 @@
                     </div>
                     ${renderCardTimeTracking(r)}
                     ${renderCardSignatures(r)}
+                    ${renderCardAttachments(r)}
                 </div>
             `).join('');
         }
@@ -1814,6 +2065,9 @@
             setReportId();
             // Signatures are session-only; cloning must not carry old ink from a previous form
             if (typeof window.__clearAllSignatures === 'function') window.__clearAllSignatures();
+            // Restore the cloned report's attachments (if any) — these are persisted data,
+            // not session-only like signatures, so they DO carry over from the clone source.
+            restoreAttachments(report.attachments || { enabled: false, items: [] });
             cloneSourceEl.value = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
             // Visible feedback
@@ -1838,6 +2092,9 @@
             // and on the form (so the user can re-print the signed PDF without re-signing).
             // They get cleared only on Clone, Clear button, or Load JSON.
             newReport.signatures = collectSignatures();
+            // Persist attachments (images / torque graphs) similarly — survive save, JSON,
+            // print, and the saved card.
+            newReport.attachments = collectAttachments();
             const reports = getReports();
             reports.push(newReport);
             saveReports(reports);
@@ -1884,6 +2141,12 @@
                 fillTimeRows('workTimeRows', []);
                 fillTimeRows('travelTimeRows', []);
                 clearAllSignatures();
+                // Clear attachments too
+                attachments = [];
+                enableAttachmentsEl.checked = false;
+                attachmentsSectionEl.hidden = true;
+                attachmentsSectionEl.removeAttribute('data-print');
+                renderAttachments();
             }, 0);
         });
 
@@ -2657,6 +2920,29 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             `;
         }
 
+        // Render attachments inside a saved report card (form view only — print hides these)
+        function renderCardAttachments(r) {
+            const att = r.attachments;
+            if (!att || !att.enabled || !Array.isArray(att.items) || !att.items.length) return '';
+            const tiles = att.items.map(a => {
+                if (!a.dataUrl) return '';
+                const caption = a.caption ? `<div class="card-attachment-caption">${escapeHtml(a.caption)}</div>` : '';
+                return `
+                    <div class="card-attachment">
+                        <img src="${a.dataUrl}" alt="${escapeHtml(a.name || 'attachment')}">
+                        ${caption}
+                    </div>
+                `;
+            }).join('');
+            const n = att.items.length;
+            return `
+                <div class="card-attachments">
+                    <span class="card-attachments-label">Images &amp; Graphs (${n})</span>
+                    <div class="card-attachments-grid">${tiles}</div>
+                </div>
+            `;
+        }
+
         // Render Psets inside a saved report card
         function renderPsetsDisplay(steps) {
             // Detect legacy flat format at the array level: [{step, before, after}, ...]
@@ -2720,6 +3006,207 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         // ===== Signature pads (session-only — NOT saved anywhere) =====
         const enableSignaturesEl = document.getElementById('enableSignatures');
         const signaturesSectionEl = document.getElementById('signaturesSection');
+
+        // ===== Attachments (images / torque graphs) =====
+        // Each attachment is { id, caption, name, dataUrl } stored as base64 data URL
+        // so it survives save/JSON/print without needing a backend.
+        const enableAttachmentsEl = document.getElementById('enableAttachments');
+        const attachmentsSectionEl = document.getElementById('attachmentsSection');
+        const attachmentFileInputEl = document.getElementById('attachmentFileInput');
+        const attachmentDropzoneEl = document.getElementById('attachmentDropzone');
+        const attachmentGridEl = document.getElementById('attachmentGrid');
+        const attachmentCountEl = document.getElementById('attachmentCount');
+        const addAttachmentBtnEl = document.getElementById('addAttachmentBtn');
+
+        // Cap per-image size to avoid blowing out localStorage / JSON exports.
+        // 5 MB is generous for screenshots and most torque-graph exports.
+        const ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024;
+        const ATTACHMENT_ACCEPT = /^image\//;
+
+        let attachments = []; // in-memory list of {id, name, caption, dataUrl}
+
+        function attachmentNewId() {
+            return 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        function updateAttachmentCount() {
+            const n = attachments.length;
+            attachmentCountEl.textContent = n === 1 ? '1 image' : n + ' images';
+        }
+
+        function renderAttachments() {
+            attachmentGridEl.innerHTML = '';
+            attachments.forEach((att, idx) => {
+                const card = document.createElement('div');
+                card.className = 'attachment-card';
+                card.dataset.id = att.id;
+                card.innerHTML = `
+                    <div class="attachment-thumb-wrap">
+                        <img class="attachment-thumb" src="${att.dataUrl}" alt="${escapeHtml(att.name || '')}">
+                    </div>
+                    <div class="attachment-caption-print">${escapeHtml(att.caption || '')}</div>
+                    <div class="attachment-meta">
+                        <input type="text" class="attachment-caption" data-idx="${idx}"
+                               placeholder="Caption (e.g. 'Torque graph – Joint 1')"
+                               value="${escapeHtml(att.caption || '')}"
+                               title="Optional caption. Printed below the image on the PDF.">
+                        <div class="attachment-footer">
+                            <span>${escapeHtml(att.name || 'image')}</span>
+                            <button type="button" class="attachment-remove" data-id="${att.id}" title="Remove this image">Remove</button>
+                        </div>
+                    </div>
+                `;
+                attachmentGridEl.appendChild(card);
+            });
+            updateAttachmentCount();
+        }
+
+        // Read a File as a data URL. Rejects non-images and oversize files.
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                if (!ATTACHMENT_ACCEPT.test(file.type)) {
+                    reject(new Error(`"${file.name}" is not an image`));
+                    return;
+                }
+                if (file.size > ATTACHMENT_MAX_BYTES) {
+                    reject(new Error(`"${file.name}" is larger than 5 MB`));
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error(`Failed to read "${file.name}"`));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function addFiles(files) {
+            const list = Array.from(files || []);
+            if (!list.length) return;
+            let added = 0;
+            for (const file of list) {
+                try {
+                    const dataUrl = await readFileAsDataUrl(file);
+                    attachments.push({
+                        id: attachmentNewId(),
+                        name: file.name,
+                        caption: '',
+                        dataUrl
+                    });
+                    added++;
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            }
+            if (added > 0) {
+                renderAttachments();
+                // Auto-open the section when the user adds their first image
+                if (!enableAttachmentsEl.checked) {
+                    enableAttachmentsEl.checked = true;
+                    attachmentsSectionEl.hidden = false;
+                }
+                showToast(added === 1 ? 'Image added' : added + ' images added', 'success');
+            }
+        }
+
+        function removeAttachment(id) {
+            attachments = attachments.filter(a => a.id !== id);
+            renderAttachments();
+        }
+
+        // Wire the file input + button + dropzone
+        addAttachmentBtnEl.addEventListener('click', () => attachmentFileInputEl.click());
+        attachmentDropzoneEl.addEventListener('click', () => attachmentFileInputEl.click());
+        attachmentFileInputEl.addEventListener('change', () => {
+            addFiles(attachmentFileInputEl.files);
+            attachmentFileInputEl.value = ''; // allow re-picking the same file
+        });
+        attachmentDropzoneEl.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            attachmentDropzoneEl.classList.add('dragover');
+        });
+        attachmentDropzoneEl.addEventListener('dragleave', () => {
+            attachmentDropzoneEl.classList.remove('dragover');
+        });
+        attachmentDropzoneEl.addEventListener('drop', (e) => {
+            e.preventDefault();
+            attachmentDropzoneEl.classList.remove('dragover');
+            addFiles(e.dataTransfer.files);
+        });
+        // Delegated handlers for caption input + remove button
+        attachmentGridEl.addEventListener('input', (e) => {
+            const t = e.target;
+            if (t.classList && t.classList.contains('attachment-caption')) {
+                const idx = parseInt(t.dataset.idx, 10);
+                if (attachments[idx]) {
+                    attachments[idx].caption = t.value;
+                    // Mirror the value into the print-only caption element so the
+                    // printed PDF always shows the latest caption text.
+                    const card = t.closest('.attachment-card');
+                    if (card) {
+                        const printEl = card.querySelector('.attachment-caption-print');
+                        if (printEl) printEl.textContent = t.value;
+                    }
+                }
+            }
+        });
+        attachmentGridEl.addEventListener('click', (e) => {
+            const btn = e.target.closest('.attachment-remove');
+            if (btn) removeAttachment(btn.dataset.id);
+        });
+
+        enableAttachmentsEl.addEventListener('change', () => {
+            attachmentsSectionEl.hidden = !enableAttachmentsEl.checked;
+            if (enableAttachmentsEl.checked) {
+                attachmentsSectionEl.setAttribute('data-print', 'on');
+            } else {
+                attachmentsSectionEl.removeAttribute('data-print');
+            }
+        });
+
+        // Collect attachments for save / JSON export. Returns { enabled, items: [...] }.
+        function collectAttachments() {
+            if (!enableAttachmentsEl.checked) return { enabled: false, items: [] };
+            return {
+                enabled: true,
+                items: attachments.map(a => ({
+                    id: a.id,
+                    name: a.name,
+                    caption: a.caption || '',
+                    dataUrl: a.dataUrl
+                }))
+            };
+        }
+
+        // Restore attachments from saved data (used on JSON load).
+        // Returns a promise; resolves when all images have been re-rendered.
+        function restoreAttachments(att) {
+            const enabled = att && att.enabled === true;
+            enableAttachmentsEl.checked = enabled;
+            attachmentsSectionEl.hidden = !enabled;
+            if (enabled) attachmentsSectionEl.setAttribute('data-print', 'on');
+            if (!enabled || !Array.isArray(att.items)) {
+                attachments = [];
+                renderAttachments();
+                return Promise.resolve();
+            }
+            attachments = att.items.map(a => ({
+                id: a.id || attachmentNewId(),
+                name: a.name || '',
+                caption: a.caption || '',
+                dataUrl: a.dataUrl
+            })).filter(a => a.dataUrl);
+            renderAttachments();
+            return Promise.resolve();
+        }
+
+        // Make sure attachments print only when the section is enabled.
+        function syncAttachmentsForPrint() {
+            if (enableAttachmentsEl.checked && attachments.length > 0) {
+                attachmentsSectionEl.setAttribute('data-print', 'on');
+            } else {
+                attachmentsSectionEl.removeAttribute('data-print');
+            }
+        }
 
         function setupSignaturePad(canvasId, imgId, clearBtnId, dateSpanId) {
             const canvas = document.getElementById(canvasId);
@@ -2977,6 +3464,8 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             data.travelTime = collectTimeRows('travelTimeRows');
             // Attach signatures so the JSON round-trip preserves them
             data.signatures = collectSignatures();
+            // Attach attachments so images/torque graphs survive JSON round-trip
+            data.attachments = collectAttachments();
             // `hasData` checks across scalars (strings, dates) AND non-empty arrays —
             // signatures is an object so it's excluded (presence implies intent)
             const hasData = Object.values(data).some(v => {
@@ -3018,6 +3507,12 @@ function openCalendar(anchorEl, currentIso, onSelect) {
                     } else {
                         if (typeof window.__clearAllSignatures === 'function') window.__clearAllSignatures();
                     }
+                    // Restore attachments (images / torque graphs) if present
+                    if (data.attachments) {
+                        await restoreAttachments(data.attachments);
+                    } else {
+                        await restoreAttachments({ enabled: false, items: [] });
+                    }
                     showToast('✓ Form loaded from JSON', 'success');
                 } catch (err) {
                     showToast('Invalid JSON file: ' + err.message, 'error');
@@ -3053,6 +3548,8 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         document.getElementById('printBtn').addEventListener('click', () => {
             // Sync canvas → img mirror so signatures render on the printed PDF
             if (typeof syncSignaturesForPrint === 'function') syncSignaturesForPrint();
+            // Mark the attachments section for printing if it's enabled
+            if (typeof syncAttachmentsForPrint === 'function') syncAttachmentsForPrint();
             window.print();
         });
 
