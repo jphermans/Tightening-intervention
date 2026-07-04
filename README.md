@@ -23,6 +23,7 @@ A modern, installable web app for **Atlas Copco service technicians** to generat
 - Draw with mouse, finger, or stylus
 - Names auto-fill from Contact / Technician fields
 - Signatures **persist with the report** — visible on the saved card and on the printed PDF
+- Date stamps **match the report date** in DD/MM/YYYY format
 - Date stamps preserved on re-print
 
 ### 📦 Reports & data
@@ -33,7 +34,10 @@ A modern, installable web app for **Atlas Copco service technicians** to generat
 - **Delete** individual or all reports
 
 ### 📄 Print to PDF
-- 3-page A4 layout: form fields + Psets/notes + work/travel/signatures + saved audit trail
+- Branded **teal color header** on the first page — matches the web page header
+- **Atlas Copco logo** in the upper-right of the printed header (placeholder wordmark at `icons/atlas-copco-logo.svg` — drop in the official asset and the layout will size it automatically)
+- PDF file gets the **same filename pattern as JSON exports** (`<customer>_<date>_<id>.pdf`) so every saved PDF has a unique, descriptive name
+- 2–3 page A4 layout: form fields + Psets/notes + work/travel/signatures + saved audit trail
 - Compact print styles, hides buttons and decorative chrome
 
 ### 📱 Installable PWA
@@ -87,7 +91,7 @@ Once installed it opens full-screen, runs offline, and behaves like a native app
 2. **Sign** — toggle the signature section, draw on both pads with your finger, mouse, or stylus.
 3. **Track time** — add rows for each work block and travel leg. Durations and totals are calculated automatically.
 4. **Save Report** — the entry appears in the *Saved Reports* list with full details, time tables, and signature thumbnails.
-5. **Print to PDF** — open the browser print dialog and choose *Save as PDF*. Hand the file to the customer.
+5. **Print to PDF** — open the browser print dialog and choose *Save as PDF*. The saved file gets the same descriptive name as the JSON export (e.g. `stellantis-nv-aartselaar-plant_2025-12-04_VCXMFB.pdf`) and shows a teal color header on the first page. Hand the file to the customer.
 6. **Back up** — *Save to JSON* downloads a portable file with a descriptive name like `stellantis-nv-aartselaar-plant_2025-12-04_VCXMFB.json` (customer name sanitized, ISO date, report ID). *Load from JSON* restores it on any device.
 7. **Fill Demo** — explore the app with one click (asks for confirmation before overwriting real data).
 
@@ -138,13 +142,15 @@ intervention-report/
 ├── manifest.json             ← PWA manifest
 ├── sw.js                     ← service worker
 ├── icons/
-│   ├── icon.svg              ← source vector
+│   ├── icon.svg              ← source vector for the PWA/app icon
 │   ├── icon-maskable.svg     ← maskable variant
 │   ├── icon-192.png          ← Android home screen
 │   ├── icon-512.png          ← Android splash
 │   ├── icon-maskable-512.png ← adaptive launcher
 │   ├── apple-touch-icon.png  ← iOS home screen (180×180)
-│   └── favicon-32.png        ← browser tab
+│   ├── favicon-32.png        ← browser tab
+│   └── atlas-copco-logo.svg  ← logo used in the printed PDF header
+│                              (replace with the official Atlas Copco logo)
 ├── docs/                     ← screenshots used by this README
 └── .gitignore
 ```

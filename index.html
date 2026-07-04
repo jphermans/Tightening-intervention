@@ -42,9 +42,30 @@
             padding: 24px 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
-        header .inner { max-width: 900px; margin: auto; padding: 0 20px; }
+        header .inner { max-width: 900px; margin: auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        header .header-text { flex: 1 1 auto; min-width: 0; }
         header h1 { margin: 0; font-size: 1.6rem; font-weight: 600; }
         header .subtitle { color: var(--ac-tint); font-size: 0.95rem; margin-top: 4px; }
+        /* Brand logo in the upper-right of the header — sized for both screen and print.
+           The official Atlas Copco logo is teal-on-white, so the .header-logo-wrap
+           provides a small white card that holds the logo (its right edge sits
+           flush with the page edge when the header bleeds in print). */
+        header .header-logo-wrap {
+            flex: 0 0 auto;
+            background: #ffffff;
+            padding: 10px 18px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        header .header-logo {
+            display: block;
+            height: 52px;
+            width: auto;
+            max-width: 160px;
+            object-fit: contain;
+        }
         .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
 
         form {
@@ -131,28 +152,68 @@
 
         /* Print-friendly layout */
         @media print {
-            @page { margin: 1.2cm; size: A4; }
-            body { background: #fff !important; color: #000 !important; font-size: 10pt; line-height: 1.3; }
+            /* No page margin — the header bleeds to the edges, body content gets
+               equivalent padding so the form text stays inside the printable area. */
+            @page { margin: 0; size: A4; }
+            body {
+                background: #fff !important;
+                color: #000 !important;
+                font-size: 10pt;
+                line-height: 1.3;
+                /* Side + bottom margin equivalent to the previous 1.2cm @page margin */
+                padding: 0 1.2cm 1.2cm !important;
+                margin: 0 !important;
+            }
 
             /* Ask the browser to render background colors/graphics on print */
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-            /* Hide the colored page header bar entirely — it was creating the blank first page */
-            header { display: none !important; }
-
-            /* Add a compact inline title at the top of the printed page — keep brand color */
-            .container::before {
-                content: "Atlas Copco Tightening Intervention Report";
-                display: block;
-                font-size: 13pt;
-                font-weight: 700;
-                color: #006f8f !important;
-                margin: 0 0 8pt 0;
-                padding-bottom: 4pt;
-                border-bottom: 1.5pt solid #006f8f !important;
+            /* Colored brand bar at the top of the first printed page — mirrors the
+               web page header (teal #006f8f background, white text, light-blue subtitle).
+               Bleeds to page edges via negative margins that cancel the body padding. */
+            header {
+                display: block !important;
+                background: #006f8f !important;
+                color: #fff !important;
+                padding: 16pt 1.2cm !important;
+                margin: 0 -1.2cm 10pt !important;
+                box-shadow: none !important;
+                /* The header is a single block element so it naturally appears only on the
+                   first page — no need to suppress it on later pages. */
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+            header .inner {
+                max-width: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            header h1 {
+                margin: 0 !important;
+                font-size: 15pt !important;
+                font-weight: 600 !important;
+                color: #fff !important;
+            }
+            header .subtitle {
+                color: #b8e0ec !important;
+                font-size: 9pt !important;
+                margin-top: 2pt !important;
+            }
+            /* Print-sized brand logo — visible but not dominant.
+               The white card behind the logo bleeds to the right edge of the page
+               (header has negative right margin = -1.2cm, same as the body padding). */
+            header .header-logo-wrap {
+                background: #ffffff !important;
+                padding: 8pt 1.2cm 8pt 16pt !important;
+                margin-right: -1.2cm !important;
+                border-radius: 0 !important;
+            }
+            header .header-logo {
+                height: 42pt !important;
+                max-width: 140pt !important;
             }
 
-            /* Reset layout for print */
+            /* Reset layout for print — the colored header replaces the inline title */
             .container { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
 
             /* Form: NO page-break-inside so it flows naturally across pages */
@@ -1243,8 +1304,19 @@
     <div id="toast" aria-live="polite" aria-atomic="true"></div>
     <header>
         <div class="inner">
-            <h1>Atlas Copco Tightening Intervention</h1>
-            <div class="subtitle">Service Report Generator</div>
+            <div class="header-text">
+                <h1>Atlas Copco Tightening Intervention</h1>
+                <div class="subtitle">Service Report Generator</div>
+            </div>
+            <!--
+              Official Atlas Copco logo in the upper-right of the header.
+              The logo is brand-correct teal-on-white, so the logo area has
+              a small white background card that sits flush with the right
+              edge of the header (see .header-logo-wrap CSS).
+            -->
+            <div class="header-logo-wrap">
+                <img class="header-logo" src="icons/atlas-copco-logo.png" alt="Atlas Copco logo">
+            </div>
         </div>
     </header>
 
@@ -1609,30 +1681,37 @@
             return `${dateStr} ${timeStr}`;
         }
 
-        // Build a filesystem-safe filename for a JSON export.
-        // Format: customer_date_uniqueID.json  e.g. "stellantis-nv_2025-12-04_VCXMFB.json"
-        function makeJsonFilename(data) {
-            // Sanitize a string for use in a filename: lowercase, dashes instead of spaces,
-            // strip anything that's not [a-z0-9-_]. Collapse repeated dashes. Trim dashes.
-            function safeName(raw, fallback) {
-                if (!raw || !String(raw).trim()) return fallback;
-                return String(raw)
-                    .toLowerCase()
-                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents (é → e)
-                    .replace(/[^a-z0-9]+/g, '-')                       // non-alphanumerics → dash
-                    .replace(/-+/g, '-')                                // collapse repeated dashes
-                    .replace(/^-|-$/g, '')                              // trim leading/trailing dashes
-                    .slice(0, 60) || fallback;                          // cap length
-            }
-            const customer = safeName(data && data.customer, 'report');
+        // Sanitize a string for use in a filename: lowercase, dashes instead of spaces,
+        // strip anything that's not [a-z0-9-_]. Collapse repeated dashes. Trim dashes.
+        function safeFilenamePart(raw, fallback) {
+            if (!raw || !String(raw).trim()) return fallback;
+            return String(raw)
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents (é → e)
+                .replace(/[^a-z0-9]+/g, '-')                       // non-alphanumerics → dash
+                .replace(/-+/g, '-')                                // collapse repeated dashes
+                .replace(/^-|-$/g, '')                              // trim leading/trailing dashes
+                .slice(0, 60) || fallback;                          // cap length
+        }
+
+        // Build the shared filename base "<customer>_<date>_<id>" used for both
+        // JSON exports and the PDF title. Extension is appended by the caller.
+        // Example: "stellantis-nv_2025-12-04_VCXMFB"
+        function makeFilenameBase(data) {
+            const customer = safeFilenamePart(data && data.customer, 'report');
             // ISO date (sortable, locale-independent) — fall back to today if missing
             const isoDate = (data && data.reportDate) || new Date().toISOString().slice(0, 10);
-            // Validate it looks like a date, else fall back
             const datePart = /^\d{4}-\d{2}-\d{2}$/.test(isoDate)
                 ? isoDate
                 : new Date().toISOString().slice(0, 10);
             const id = (data && data.id) || newId();
-            return `${customer}_${datePart}_${id}.json`;
+            return `${customer}_${datePart}_${id}`;
+        }
+
+        // Build a filesystem-safe filename for a JSON export.
+        // Format: customer_date_uniqueID.json  e.g. "stellantis-nv_2025-12-04_VCXMFB.json"
+        function makeJsonFilename(data) {
+            return `${makeFilenameBase(data)}.json`;
         }
 
         function loadReports() {
@@ -2390,9 +2469,12 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             drawSignature('customerSig', 60);
             drawSignature('technicianSig', 90);
 
-            const today = new Date().toLocaleDateString('en-GB');
-            document.getElementById('customerSigDate').textContent = today;
-            document.getElementById('technicianSigDate').textContent = today;
+            // Signature dates must follow the report date (DD/MM/YYYY)
+            // so the printed report is internally consistent.
+            const reportIso = document.getElementById('reportDate').isoValue;
+            const sigDateLabel = reportIso ? formatDateDDMMYYYY(reportIso) : '—';
+            document.getElementById('customerSigDate').textContent = sigDateLabel;
+            document.getElementById('technicianSigDate').textContent = sigDateLabel;
 
             showToast('Demo data loaded — scroll to explore', 'success');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2712,8 +2794,21 @@ function openCalendar(anchorEl, currentIso, onSelect) {
 
             function syncDate() {
                 if (hasInk && dateSpan) {
-                    const today = new Date();
-                    dateSpan.textContent = today.toLocaleDateString();
+                    // Use the report date (DD/MM/YYYY format) so the signature is dated
+                    // consistently with the rest of the report. Falls back to today if
+                    // the report date is empty or invalid.
+                    const reportIso = reportDateEl && reportDateEl.isoValue;
+                    let dateLabel;
+                    if (reportIso && /^\d{4}-\d{2}-\d{2}$/.test(reportIso)) {
+                        dateLabel = formatDateDDMMYYYY(reportIso);
+                    } else {
+                        // Fallback: today in DD/MM/YYYY via the existing helper
+                        const today = new Date();
+                        const tzOffset = today.getTimezoneOffset() * 60000;
+                        const isoToday = new Date(today.getTime() - tzOffset).toISOString().slice(0, 10);
+                        dateLabel = formatDateDDMMYYYY(isoToday);
+                    }
+                    dateSpan.textContent = dateLabel;
                 }
             }
 
@@ -2860,16 +2955,26 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             }
             customerPad.syncToImg();
             technicianPad.syncToImg();
-            // Only set today's date if the date span is empty — preserves the original
-            // signing date when re-printing a saved report days/weeks later.
-            const today = new Date().toLocaleDateString();
+            // Only fill the date if it's still empty — preserves the original signing
+            // date when re-printing a saved report days/weeks later. Date follows the
+            // report date in DD/MM/YYYY format (falls back to today in the same format).
+            const reportIso = reportDateEl && reportDateEl.isoValue;
+            let dateLabel;
+            if (reportIso && /^\d{4}-\d{2}-\d{2}$/.test(reportIso)) {
+                dateLabel = formatDateDDMMYYYY(reportIso);
+            } else {
+                const today = new Date();
+                const tzOffset = today.getTimezoneOffset() * 60000;
+                const isoToday = new Date(today.getTime() - tzOffset).toISOString().slice(0, 10);
+                dateLabel = formatDateDDMMYYYY(isoToday);
+            }
             const customerDateEl = document.getElementById('customerSigDate');
             const technicianDateEl = document.getElementById('technicianSigDate');
             if (!customerPad.isEmpty() && (!customerDateEl.textContent || customerDateEl.textContent === '—')) {
-                customerDateEl.textContent = today;
+                customerDateEl.textContent = dateLabel;
             }
             if (!technicianPad.isEmpty() && (!technicianDateEl.textContent || technicianDateEl.textContent === '—')) {
-                technicianDateEl.textContent = today;
+                technicianDateEl.textContent = dateLabel;
             }
             signaturesSectionEl.setAttribute('data-print', 'on');
         }
@@ -2937,6 +3042,26 @@ function openCalendar(anchorEl, currentIso, onSelect) {
 
         // Print to PDF — uses the browser's built-in print dialog (Cmd/Ctrl+P),
         // and the @media print CSS strips buttons and shows a clean layout.
+        // The page <title> is swapped before print so the saved PDF file gets a
+        // unique, descriptive filename matching the JSON export naming pattern.
+        const ORIGINAL_TITLE = document.title;
+        function setPdfTitleForPrint() {
+            try {
+                // Build a safe filename base from current form data (no extension —
+                // Chrome appends ".pdf" automatically, Safari shows the title in the dialog).
+                const data = typeof collectFormData === 'function' ? collectFormData() : {};
+                document.title = makeFilenameBase(data);
+            } catch (_) {
+                // Fallback: leave the original title so we never blank the document title
+            }
+        }
+        function restoreOriginalTitle() {
+            document.title = ORIGINAL_TITLE;
+        }
+        // Swap the title just before printing, restore it once the dialog closes.
+        // `beforeprint` / `afterprint` are widely supported (Chrome, Edge, Firefox, Safari).
+        window.addEventListener('beforeprint', setPdfTitleForPrint);
+        window.addEventListener('afterprint', restoreOriginalTitle);
         document.getElementById('printBtn').addEventListener('click', () => {
             // Sync canvas → img mirror so signatures render on the printed PDF
             if (typeof syncSignaturesForPrint === 'function') syncSignaturesForPrint();
