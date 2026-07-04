@@ -47,21 +47,14 @@
         header h1 { margin: 0; font-size: 1.6rem; font-weight: 600; }
         header .subtitle { color: var(--ac-tint); font-size: 0.95rem; margin-top: 4px; }
         /* Brand logo in the upper-right of the header — sized for both screen and print.
-           The official Atlas Copco logo is teal-on-white, so the .header-logo-wrap
-           provides a small white card that holds the logo (its right edge sits
-           flush with the page edge when the header bleeds in print). */
-        header .header-logo-wrap {
-            flex: 0 0 auto;
-            background: #ffffff;
-            padding: 10px 18px;
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+           The PNG is mostly transparent so the logo sits directly on the teal
+           background with no card; the white elements of the logo design
+           (AtlasCopco wordmark and the two horizontal stripes) stay visible
+           against the teal. */
         header .header-logo {
+            flex: 0 0 auto;
             display: block;
-            height: 52px;
+            height: 56px;
             width: auto;
             max-width: 160px;
             object-fit: contain;
@@ -199,18 +192,11 @@
                 font-size: 9pt !important;
                 margin-top: 2pt !important;
             }
-            /* Print-sized brand logo — visible but not dominant.
-               The white card behind the logo bleeds to the right edge of the page
-               (header has negative right margin = -1.2cm, same as the body padding). */
-            header .header-logo-wrap {
-                background: #ffffff !important;
-                padding: 8pt 1.2cm 8pt 16pt !important;
-                margin-right: -1.2cm !important;
-                border-radius: 0 !important;
-            }
+            /* Print-sized brand logo — no card, sits directly on the teal header.
+               Sized to be visible but not dominant on the printed page. */
             header .header-logo {
-                height: 42pt !important;
-                max-width: 140pt !important;
+                height: 44pt !important;
+                max-width: 150pt !important;
             }
 
             /* Reset layout for print — the colored header replaces the inline title */
@@ -1310,13 +1296,10 @@
             </div>
             <!--
               Official Atlas Copco logo in the upper-right of the header.
-              The logo is brand-correct teal-on-white, so the logo area has
-              a small white background card that sits flush with the right
-              edge of the header (see .header-logo-wrap CSS).
+              The PNG is mostly transparent — only the logo design itself is
+              opaque. The .header-logo CSS sizes it for both screen and print.
             -->
-            <div class="header-logo-wrap">
-                <img class="header-logo" src="icons/atlas-copco-logo.png" alt="Atlas Copco logo">
-            </div>
+            <img class="header-logo" src="icons/atlas-copco-logo.png" alt="Atlas Copco logo">
         </div>
     </header>
 
