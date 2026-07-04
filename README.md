@@ -35,6 +35,7 @@ A modern, installable web app for **Atlas Copco service technicians** to generat
 
 ### 📄 Print to PDF
 - Branded **teal color header** on the first page — matches the web page header
+- **Atlas Copco logo** in the upper-right of the printed header (placeholder wordmark at `icons/atlas-copco-logo.svg` — drop in the official asset and the layout will size it automatically)
 - PDF file gets the **same filename pattern as JSON exports** (`<customer>_<date>_<id>.pdf`) so every saved PDF has a unique, descriptive name
 - 2–3 page A4 layout: form fields + Psets/notes + work/travel/signatures + saved audit trail
 - Compact print styles, hides buttons and decorative chrome
@@ -141,13 +142,15 @@ intervention-report/
 ├── manifest.json             ← PWA manifest
 ├── sw.js                     ← service worker
 ├── icons/
-│   ├── icon.svg              ← source vector
+│   ├── icon.svg              ← source vector for the PWA/app icon
 │   ├── icon-maskable.svg     ← maskable variant
 │   ├── icon-192.png          ← Android home screen
 │   ├── icon-512.png          ← Android splash
 │   ├── icon-maskable-512.png ← adaptive launcher
 │   ├── apple-touch-icon.png  ← iOS home screen (180×180)
-│   └── favicon-32.png        ← browser tab
+│   ├── favicon-32.png        ← browser tab
+│   └── atlas-copco-logo.svg  ← logo used in the printed PDF header
+│                              (replace with the official Atlas Copco logo)
 ├── docs/                     ← screenshots used by this README
 └── .gitignore
 ```
