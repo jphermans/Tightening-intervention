@@ -1,0 +1,26 @@
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Node (the project doesn't have a package.json that depends on anything,
+# but ignore node_modules if it ever shows up)
+node_modules/
+package-lock.json
+
+# Test artefacts — local screenshots, JSON exports, generated PDFs.
+# These are useful during development but bloat the repo.
+test-output/
+
+# OS metadata and editor temp files
+*.tmp
+*~
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Local Python http server logs (used during manual testing only)
+*.log

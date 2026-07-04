@@ -1,0 +1,40 @@
+{
+  "name": "Atlas Copco Tightening Intervention",
+  "short_name": "Intervention",
+  "description": "Generate, sign, and print Atlas Copco tightening intervention service reports. Works fully offline once installed.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f2ef",
+  "theme_color": "#006f8f",
+  "categories": ["productivity", "business", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Report",
+      "short_name": "New",
+      "url": "./index.html",
+      "description": "Start a fresh intervention report"
+    }
+  ]
+}

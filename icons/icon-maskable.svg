@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Maskable icon: safe zone is the inner 80% (i.e., content fits in a 410x410
+     area centered in the 512x512 viewport with 51px padding on each side).
+     System launchers may crop to a circle/squircle/rounded-square, so the
+     important content stays inside the safe zone. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Solid teal background that fills the entire viewport (masked area) -->
+  <rect width="512" height="512" fill="#006f8f"/>
+  <!-- Content stays inside the safe zone (51–461 on each axis) -->
+  <g transform="translate(256 230)" fill="#ffffff">
+    <!-- Wrench head (left circle with notch) -->
+    <circle cx="-60" cy="0" r="44" fill="#ffffff"/>
+    <circle cx="-60" cy="0" r="22" fill="#006f8f"/>
+    <!-- Wrench handle -->
+    <rect x="-36" y="-12" width="140" height="24" rx="6" ry="6" fill="#ffffff"/>
+    <!-- Wrench right tip -->
+    <circle cx="124" cy="0" r="34" fill="#ffffff"/>
+    <circle cx="124" cy="0" r="16" fill="#006f8f"/>
+  </g>
+  <text x="256" y="380" text-anchor="middle"
+        font-family="Segoe UI, Helvetica, Arial, sans-serif"
+        font-weight="800" font-size="44" fill="#ffffff"
+        letter-spacing="4">AC</text>
+</svg>

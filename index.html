@@ -1,8 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#006f8f">
+    <meta name="description" content="Atlas Copco Tightening Intervention Report — generate, sign, and print service reports. Works offline once installed.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Intervention">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Intervention">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <link rel="mask-icon" href="icons/icon.svg" color="#006f8f">
     <title>Atlas Copco Tightening Intervention Report</title>
     <style>
         :root {
@@ -88,6 +102,18 @@
         button:hover { background: var(--ac-primary-dark); }
         button.secondary { background: transparent; color: var(--ac-primary); border: 1px solid var(--ac-primary); }
         button.secondary:hover { background: var(--ac-tint); }
+
+        /* Demo button — same look as secondary but with the yellow brand accent on hover */
+        button.demo-btn {
+            background: transparent;
+            color: var(--ac-primary);
+            border: 1px dashed var(--ac-yellow);
+        }
+        button.demo-btn:hover {
+            background: #fff8d9;
+            border-color: var(--ac-yellow);
+            border-style: solid;
+        }
         .inline-group { display: flex; gap: 8px; align-items: stretch; }
         .inline-group select { flex: 1; }
         .inline-group button { white-space: nowrap; }
@@ -231,7 +257,8 @@
             }
 
             /* Pset blocks (form + saved card) — keep teal accent */
-            .pset-block {
+            .pset-block,
+            .time-table {
                 background: #fafcfd !important;
                 border: 0.5pt solid #b8e0ec !important;
                 border-left: 2pt solid #006f8f !important;
@@ -301,7 +328,42 @@
             }
 
             .empty { color: #5b6770 !important; }
-        }
+
+            /* Signature section in print: hide toggle, show signature blocks with printed canvas image */
+            .signature-toggle-row { display: none !important; }
+            #signaturesSection:not([data-print="on"]) { display: none !important; }
+            #signaturesSection[data-print="on"] {
+                display: block !important;
+                page-break-inside: avoid;
+                margin-top: 12pt;
+            }
+            .signature-block canvas { display: none !important; }
+            .signature-block .sig-print-img {
+                display: block !important;
+                width: 100%;
+                max-width: 240pt;
+                height: 50pt;
+                object-fit: contain;
+                border-bottom: 0.5pt solid #000;
+                background: #fff;
+            }
+            .signature-block .sig-clear-btn { display: none !important; }
+            .signature-block .sig-name {
+                border: none !important;
+                background: transparent !important;
+                border-bottom: 0.5pt solid #888 !important;
+                padding: 1pt 2pt !important;
+                font-size: 9pt !important;
+                min-width: 100pt;
+                display: inline-block;
+            }
+            .signature-statement {
+                background: #fff8d9 !important;
+                border-left: 2pt solid #ffcd00 !important;
+                font-size: 8.5pt !important;
+                padding: 4pt 8pt !important;
+                margin-top: 8pt !important;
+            }
         }
 
         /* Toast notifications */
@@ -429,6 +491,46 @@
         .steps-table .col-step { width: 40%; }
         .steps-table .col-before, .steps-table .col-after { width: 25%; }
         .steps-table .col-remove { width: 10%; text-align: center; }
+
+        /* Hide work/travel Add Row buttons + field hints when printing */
+        @media print {
+            #addWorkTimeBtn,
+            #addTravelTimeBtn,
+            .field-hint,
+            .time-table .remove-row { display: none !important; }
+            .time-table th,
+            .time-table td {
+                padding: 2pt 4pt !important;
+                border: 0.5pt solid #b8e0ec !important;
+                font-size: 8pt !important;
+            }
+            .time-table th {
+                background: #b8e0ec !important;
+                color: #005d78 !important;
+                font-weight: 700 !important;
+                font-size: 7pt !important;
+                text-transform: uppercase;
+            }
+            .time-table td input {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                font-size: 9pt !important;
+                color: #2f363a !important;
+            }
+            .time-table tfoot td {
+                background: #fafcfd !important;
+                border-top: 1pt solid #006f8f !important;
+            }
+            .time-table tfoot .time-total-label {
+                color: #005d78 !important;
+                font-size: 7pt !important;
+            }
+            .time-table tfoot .time-total-value {
+                color: #005d78 !important;
+                font-size: 9pt !important;
+            }
+        }
         .steps-table .remove-row {
             background: transparent;
             color: #c0392b;
@@ -448,7 +550,6 @@
             margin-top: 10px;
         }
         /* Saved card display of steps */
-        .steps-display-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 6px;
@@ -519,6 +620,247 @@
         .pset-block .steps-table {
             margin-top: 0;
         }
+
+        /* Inline hint text under section titles (Work Time / Travel Time) */
+        .field-hint {
+            font-size: 0.82rem;
+            color: var(--ac-grey);
+            margin: 0 0 10px;
+            font-style: italic;
+        }
+
+        /* Custom date input (text + calendar picker button) */
+.custom-date-wrapper {
+    display: flex;
+    gap: 6px;
+    align-items: stretch;
+}
+.custom-date-wrapper input.custom-date-input {
+    flex: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+.custom-date-btn {
+    padding: 0 12px !important;
+    background: var(--ac-tint) !important;
+    color: var(--ac-primary-dark) !important;
+    border: 1px solid var(--ac-tint) !important;
+    border-radius: 4px !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+.custom-date-btn:hover {
+    background: var(--ac-primary) !important;
+    color: #fff !important;
+}
+.custom-date-input::placeholder { color: #b0b5b9; }
+
+/* Calendar popup */
+.cal-popup {
+    position: absolute;
+    z-index: 10000;
+    background: #fff;
+    border: 1px solid #d1d4d7;
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+    padding: 12px;
+    width: 280px;
+    user-select: none;
+    font-family: inherit;
+}
+.cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.cal-title {
+    font-weight: 700;
+    color: var(--ac-primary-dark);
+    font-size: 0.95rem;
+}
+.cal-nav-btn {
+    background: transparent !important;
+    color: var(--ac-primary) !important;
+    border: 1px solid var(--ac-primary) !important;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px !important;
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 !important;
+    font-weight: 700;
+}
+.cal-nav-btn:hover {
+    background: var(--ac-primary) !important;
+    color: #fff !important;
+}
+.cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 4px;
+}
+.cal-weekdays span {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--ac-grey);
+    font-weight: 700;
+    padding: 4px 0;
+    text-transform: uppercase;
+}
+.cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+.cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--ac-charcoal);
+    background: transparent;
+    border: none;
+    padding: 0 !important;
+    font-family: inherit;
+}
+.cal-day:hover { background: var(--ac-tint); }
+.cal-day.other-month { color: #b0b5b9; }
+.cal-day.today { font-weight: 700; color: var(--ac-primary); border: 1.5px solid var(--ac-primary-light); }
+.cal-day.selected {
+    background: var(--ac-primary) !important;
+    color: #fff !important;
+    font-weight: 700;
+}
+.cal-day.selected:hover { background: var(--ac-primary-dark) !important; }
+.cal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7e8;
+    gap: 8px;
+}
+.cal-footer button {
+    flex: 1;
+    padding: 6px 8px !important;
+    font-size: 0.8rem !important;
+    background: transparent !important;
+    color: var(--ac-primary) !important;
+    border: 1px solid var(--ac-primary) !important;
+}
+.cal-footer button:hover { background: var(--ac-tint) !important; }
+@media print {
+    .cal-popup { display: none !important; }
+}
+
+/* Custom time input — monospace tabular nums for clean alignment */
+.custom-time {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+.custom-time::placeholder { color: #b0b5b9; }
+        .time-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+            background: #fff;
+        }
+        .time-table th,
+        .time-table td {
+            padding: 7px 8px;
+            border: 1px solid #d1d4d7;
+            text-align: left;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+        .time-table th {
+            background: var(--ac-tint);
+            color: var(--ac-primary-dark);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .time-table td input.custom-time,
+        .time-table td input[type="text"] {
+            border: none;
+            background: transparent;
+            padding: 4px 0;
+            width: 100%;
+            font-size: 0.92rem;
+            color: var(--ac-charcoal);
+            font-family: inherit;
+        }
+        .time-table td input.custom-time:focus,
+        .time-table td input[type="text"]:focus {
+            outline: 2px solid var(--ac-primary-light);
+            outline-offset: -2px;
+            background: #fff;
+            border-radius: 2px;
+        }
+        .time-table .col-time-label { width: 26%; }
+        .time-table .col-time-start,
+        .time-table .col-time-end { width: 18%; }
+        .time-table .col-time-dur { width: 18%; }
+        .time-table .col-time-rm { width: 8%; text-align: center; }
+        .time-table .time-dur {
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+            color: var(--ac-charcoal);
+        }
+        .time-table .time-dur.empty {
+            color: var(--ac-grey);
+            font-weight: 400;
+            font-style: italic;
+        }
+        .time-table .remove-row {
+            background: transparent;
+            color: #c0392b;
+            border: 1px solid transparent;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 3px;
+            transition: all 0.15s;
+        }
+        .time-table .remove-row:hover {
+            background: #c0392b;
+            color: #fff;
+        }
+        .time-table tfoot td {
+            background: #fafcfd;
+            font-weight: 700;
+            color: var(--ac-primary-dark);
+            border-top: 2px solid var(--ac-primary);
+        }
+        .time-table tfoot .time-total-label {
+            text-align: right;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+        }
+        .time-table tfoot .time-total-value {
+            font-variant-numeric: tabular-nums;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 600px) {
+            .time-table .col-time-label,
+            .time-table .col-time-start,
+            .time-table .col-time-end,
+            .time-table .col-time-dur { width: auto; }
+            .time-table th, .time-table td { padding: 5px 4px; font-size: 0.82rem; }
+        }
         /* Saved card display */
         .pset-display {
             margin-top: 8px;
@@ -538,6 +880,207 @@
             .pset-block-header .pset-name { min-width: 0; }
             .pset-block-header .remove-pset { width: 100%; }
         }
+
+        /* Signature section */
+        .signature-toggle-row {
+            margin-top: 20px;
+            padding: 12px 14px;
+            background: #fafcfd;
+            border: 1px solid var(--ac-tint);
+            border-radius: 4px;
+        }
+        .signature-toggle-row label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin: 0;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 0.92rem;
+            color: var(--ac-charcoal);
+            font-weight: 600;
+        }
+        .signature-toggle-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .signature-hint {
+            margin-top: 4px;
+            margin-left: 24px;
+            font-size: 0.78rem;
+            color: var(--ac-grey);
+            font-weight: 400;
+        }
+        .signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        .signature-block {
+            border: 1px solid var(--ac-tint);
+            border-left: 3px solid var(--ac-primary);
+            border-radius: 4px;
+            padding: 12px;
+            background: #fff;
+        }
+        .signature-block label {
+            margin-bottom: 6px;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 0.92rem;
+            color: var(--ac-charcoal);
+            font-weight: 600;
+        }
+        .signature-block canvas {
+            border: 1px solid #d1d4d7;
+            border-radius: 3px;
+            background: #fff;
+            cursor: crosshair;
+            display: block;
+            width: 100%;
+            height: 120px;
+            touch-action: none;
+        }
+        .signature-block canvas.empty {
+            background-image:
+                linear-gradient(to right, #d1d4d7 1px, transparent 1px),
+                linear-gradient(to bottom, #d1d4d7 1px, transparent 1px);
+            background-size: 25px 25px;
+            background-position: 0 119px;
+        }
+        .signature-block .sig-print-img {
+            display: none;
+        }
+        .signature-footer {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .signature-footer .sig-name {
+            flex: 1;
+            min-width: 120px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--ac-charcoal);
+            padding-bottom: 2px;
+            border-bottom: 1px dotted #c5c9cc;
+        }
+        .signature-footer .sig-name:empty::before,
+        .signature-footer .sig-name[data-empty="true"] {
+            color: #b0b5b9;
+            font-weight: 400;
+            font-style: italic;
+        }
+        .sig-date {
+            font-size: 0.82rem;
+            color: var(--ac-grey);
+            white-space: nowrap;
+        }
+        .sig-clear-btn {
+            padding: 4px 10px !important;
+            font-size: 0.78rem !important;
+        }
+        .signature-statement {
+            margin-top: 14px;
+            padding: 10px 14px;
+            background: #fff8d9;
+            border-left: 3px solid var(--ac-yellow);
+            border-radius: 3px;
+            font-size: 0.9rem;
+            color: var(--ac-charcoal);
+            font-weight: 600;
+        }
+        @media (max-width: 600px) {
+            .signatures-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Saved-card signature display — visible in form view, hidden in print */
+        .card-signatures {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #d1d4d7;
+        }
+        .card-signatures-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ac-primary-dark);
+            background: var(--ac-tint);
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        .card-signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .card-signature {
+            border: 1px solid var(--ac-tint);
+            border-left: 3px solid var(--ac-primary);
+            border-radius: 4px;
+            padding: 8px 10px;
+            background: #fafcfd;
+        }
+        .card-signature img {
+            width: 100%;
+            height: 60px;
+            object-fit: contain;
+            background: #fff;
+            border: 1px solid #e5e7e8;
+            border-radius: 3px;
+            display: block;
+        }
+        .card-sig-name {
+            margin-top: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--ac-charcoal);
+        }
+        .card-sig-date {
+            font-size: 0.78rem;
+            color: var(--ac-grey);
+            margin-top: 2px;
+        }
+        .card-sig-statement {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #fff8d9;
+            border-left: 3px solid var(--ac-yellow);
+            border-radius: 3px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ac-charcoal);
+        }
+        @media (max-width: 600px) {
+            .card-signatures-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Print: only the current form's signature section prints —
+           saved-card signatures stay in the form view for audit, but not on paper */
+        @media print {
+            .card-signatures { display: none !important; }
+            /* Saved-card time tracking SHOULD print (it's part of the report record) */
+            .card-time-tracking { display: block !important; }
+        }
+
+        /* Saved-card time-tracking block (printed AND visible in form view) */
+        .card-time-tracking {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed #d1d4d7;
+        }
+        .card-time-block { margin-top: 8px; }
+
         .empty { color: var(--ac-grey); font-style: italic; }
         .reports-toolbar { margin: 12px 0; }
         button.danger { color: #c0392b; border-color: #c0392b; }
@@ -592,11 +1135,20 @@
             <div class="section-title">Report</div>
             <div class="grid">
                 <div class="field">
-                    <label for="reportId">Report ID (unique)</label>
+                    <label for="reportId" title="Auto-generated unique identifier for this report. Read-only — a new ID is created each time you save and start fresh.">Report ID (unique)</label>
                     <input type="text" id="reportId" readonly>
                 </div>
                 <div class="field">
-                    <label for="cloneSource">Clone from saved report</label>
+                    <label for="reportDate" title="Date of the intervention. Click the calendar icon to pick a date, or type in DD/MM/YYYY format (e.g. 04/12/2025).">Report date</label>
+                    <div class="custom-date-wrapper">
+                        <input type="text" id="reportDate" class="custom-date-input" placeholder="DD/MM/YYYY" maxlength="10" autocomplete="off" inputmode="numeric">
+                        <button type="button" class="custom-date-btn" id="reportDateBtn" tabindex="-1" aria-label="Open calendar">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="field full">
+                    <label for="cloneSource" title="Pick a previously saved report to copy its data into a fresh form. Useful for similar interventions on the same equipment.">Clone from saved report</label>
                     <div class="inline-group">
                         <select id="cloneSource">
                             <option value="">— Select a report to clone —</option>
@@ -612,23 +1164,23 @@
             <div class="section-title">Customer</div>
             <div class="grid">
                 <div class="field full">
-                    <label for="customerName">Customer Name</label>
+                    <label for="customerName" title="Company or organization name, e.g. 'Stellantis NV' or 'Atlas Copco Service Center'.">Customer Name</label>
                     <input type="text" id="customerName" required>
                 </div>
                 <div class="field">
-                    <label for="customerContact">Contact Name</label>
+                    <label for="customerContact" title="On-site contact person who can answer questions about the equipment and signs the report.">Contact Name</label>
                     <input type="text" id="customerContact">
                 </div>
                 <div class="field">
-                    <label for="customerPhone">Phone</label>
+                    <label for="customerPhone" title="Best phone number to reach the contact, including country code, e.g. '+32 3 555 0123'.">Phone</label>
                     <input type="tel" id="customerPhone">
                 </div>
                 <div class="field">
-                    <label for="customerEmail">Email</label>
+                    <label for="customerEmail" title="Contact's email address for sending the signed report.">Email</label>
                     <input type="email" id="customerEmail">
                 </div>
                 <div class="field full">
-                    <label for="customerAddress">Address</label>
+                    <label for="customerAddress" title="Full site address including street, postal code, city, and country — where the intervention took place.">Address</label>
                     <textarea id="customerAddress" rows="2"></textarea>
                 </div>
             </div>
@@ -636,11 +1188,11 @@
             <div class="section-title">Technician</div>
             <div class="grid">
                 <div class="field">
-                    <label for="technicianName">Technician Name</label>
+                    <label for="technicianName" title="Your full name as the service technician performing this intervention.">Technician Name</label>
                     <input type="text" id="technicianName" required>
                 </div>
                 <div class="field">
-                    <label for="technicianEmail">Email</label>
+                    <label for="technicianEmail" title="Your work email address for follow-up correspondence about this report.">Email</label>
                     <input type="email" id="technicianEmail">
                 </div>
             </div>
@@ -648,30 +1200,30 @@
             <div class="section-title">Equipment</div>
             <div class="grid">
                 <div class="field">
-                    <label for="controller">Controller</label>
+                    <label for="controller" title="Controller model, e.g. 'Power Focus 6000', 'PF4000', or 'Power MACS 4000'.">Controller</label>
                     <input type="text" id="controller">
                 </div>
                 <div class="field">
-                    <label for="controllerSerial">Controller Serial</label>
+                    <label for="controllerSerial" title="Serial number printed on the controller's label — required for traceability and warranty claims.">Controller Serial</label>
                     <input type="text" id="controllerSerial">
                 </div>
                 <div class="field">
-                    <label for="controllerFirmware">Controller Firmware</label>
+                    <label for="controllerFirmware" title="Firmware version before the intervention (and the target version if you're upgrading). E.g. 'v3.1.4' or 'v3.2.1'.">Controller Firmware</label>
                     <input type="text" id="controllerFirmware" placeholder="e.g. v3.2.1">
                 </div>
                 <div class="field">
-                    <label for="toolType">Tool / Spindle Type</label>
+                    <label for="toolType" title="Tool or spindle model, e.g. 'QST 50-12CT', 'ETV ST61-100-10'.">Tool / Spindle Type</label>
                     <input type="text" id="toolType">
                 </div>
                 <div class="field">
-                    <label for="toolSerial">Tool / Spindle Serial</label>
+                    <label for="toolSerial" title="Serial number on the tool or spindle — required for calibration records.">Tool / Spindle Serial</label>
                     <input type="text" id="toolSerial" required>
                 </div>
             </div>
 
             <div class="section-title">Intervention</div>
             <div class="field">
-                <label for="interventionType">Intervention Type</label>
+                <label for="interventionType" title="What you did. Choosing 'Tightening Program Optimization' reveals a step-by-step before/after table for the Psets you worked on.">Intervention Type</label>
                 <select id="interventionType">
                     <option value="Firmware Upgrade">Firmware Upgrade</option>
                     <option value="Tightening Program Optimization">Tightening Program Optimization</option>
@@ -680,7 +1232,7 @@
                 </select>
             </div>
             <div class="field" id="optimizationSection" hidden>
-                <label>Optimization Steps</label>
+                <label title="One block per Pset you tuned. Each block has rows for the individual steps, with the value before and after the intervention.">Optimization Steps</label>
                 <div id="psetsContainer"></div>
                 <button type="button" class="secondary add-step-btn" id="addPsetBtn">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -688,30 +1240,123 @@
                 </button>
             </div>
             <div class="field">
-                <label for="notes">Notes</label>
+                <label for="notes" title="Free-form notes: root cause, parts replaced, recommendations, follow-up actions, anything the customer should know.">Notes</label>
                 <textarea id="notes" rows="4"></textarea>
             </div>
 
+            <div class="section-title">Work Time</div>
+            <p class="field-hint">Record the time you actually worked on the intervention. Multiple rows let you split a session (e.g., diagnose → repair → test).</p>
+            <table class="time-table">
+                <thead>
+                    <tr>
+                        <th class="col-time-label" title="A short label for this block of work, e.g. 'Diagnosis', 'Firmware replacement', 'Calibration check'.">Activity</th>
+                        <th class="col-time-start" title="When you started this block. Use 24-hour format HH:MM, e.g. 08:30 or 14:00.">Start</th>
+                        <th class="col-time-end" title="When you stopped. Time spent is calculated automatically. Overnight end-times (e.g. 06:00 after 22:00) are handled correctly.">End</th>
+                        <th class="col-time-dur" title="Automatically calculated from Start and End. Updates as you type.">Time spent</th>
+                        <th class="col-time-rm"></th>
+                    </tr>
+                </thead>
+                <tbody id="workTimeRows"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="time-total-label">Total work time</td>
+                        <td class="time-total-value" id="workTimeTotal" title="Sum of every work-time row above.">—</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <button type="button" class="secondary add-step-btn" id="addWorkTimeBtn" title="Add another row — useful when you took a break or the work was split across multiple activities.">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add work time row
+            </button>
+
+            <div class="section-title">Travel Time</div>
+            <p class="field-hint">Record the travel to and from the site. Multiple rows for outbound and return trips.</p>
+            <table class="time-table">
+                <thead>
+                    <tr>
+                        <th class="col-time-label" title="Which trip this is, e.g. 'Outbound to site', 'Return to office'.">Leg</th>
+                        <th class="col-time-start" title="When you departed, in 24-hour HH:MM.">Departure</th>
+                        <th class="col-time-end" title="When you arrived at the destination, in 24-hour HH:MM.">Arrival</th>
+                        <th class="col-time-dur" title="Automatically calculated from Departure and Arrival.">Time spent</th>
+                        <th class="col-time-rm"></th>
+                    </tr>
+                </thead>
+                <tbody id="travelTimeRows"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="time-total-label">Total travel time</td>
+                        <td class="time-total-value" id="travelTimeTotal" title="Sum of every travel row above.">—</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <button type="button" class="secondary add-step-btn" id="addTravelTimeBtn" title="Add another row — outbound and return are tracked separately so the customer can see the full trip time.">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add travel time row
+            </button>
+
+            <div class="signature-toggle-row">
+                <label title="Show or hide the signature section. Signatures are saved with the report and stay on the form until you Clone or Clear.">
+                    <input type="checkbox" id="enableSignatures">
+                    <span>Add signature section</span>
+                </label>
+                <div class="signature-hint">Draw signatures with mouse, touch, or pen. They are saved with the report (visible on the saved card) and stay on the form until you Clone or Clear.</div>
+            </div>
+
+            <div id="signaturesSection" hidden>
+                <h3 class="section-title" style="margin-top: 24px;">Signatures</h3>
+                <div class="signatures-grid">
+                    <div class="signature-block">
+                        <label title="The customer's on-site representative signs here to confirm the intervention was carried out as described.">Customer signature</label>
+                        <canvas id="customerSig" class="empty" width="600" height="200" title="Sign with mouse, finger, or stylus. The dotted line shows where to sign."></canvas>
+                        <img id="customerSigImg" class="sig-print-img" alt="">
+                        <div class="signature-footer">
+                            <span class="sig-name" id="customerNameSig" title="Auto-filled from the Contact Name above.">—</span>
+                            <span class="sig-date">Date: <span id="customerSigDate" title="Auto-filled with today's date when you sign. Preserved when you re-print later.">—</span></span>
+                            <button type="button" class="secondary sig-clear-btn" id="clearCustomerSig">Clear</button>
+                        </div>
+                    </div>
+                    <div class="signature-block">
+                        <label title="You (the technician) sign here to certify the work.">Technician signature</label>
+                        <canvas id="technicianSig" class="empty" width="600" height="200" title="Sign with mouse, finger, or stylus. The dotted line shows where to sign."></canvas>
+                        <img id="technicianSigImg" class="sig-print-img" alt="">
+                        <div class="signature-footer">
+                            <span class="sig-name" id="technicianNameSig" title="Auto-filled from the Technician Name above.">—</span>
+                            <span class="sig-date">Date: <span id="technicianSigDate" title="Auto-filled with today's date when you sign.">—</span></span>
+                            <button type="button" class="secondary sig-clear-btn" id="clearTechnicianSig">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="signature-statement" id="signatureStatement">
+                    This document has been signed by the customer and the technician.
+                </div>
+            </div>
+
             <div class="actions">
-                <button type="submit">
+                <button type="submit" title="Save this report to the browser's local storage. It appears in the Saved Reports section below and survives page reloads.">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     Save Report
                 </button>
-                <button type="reset" class="secondary">
+                <button type="reset" class="secondary" title="Reset every field to empty. Signatures and time tables are wiped. The report date resets to today.">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     Clear
                 </button>
-                <button type="button" class="secondary" id="saveJsonBtn">
+                <button type="button" class="secondary" id="saveJsonBtn" title="Download a JSON file containing every field, the time tables, the steps, and the signatures. Use this to back up or share a report.">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Save to JSON
                 </button>
-                <button type="button" class="secondary" id="loadJsonBtn">
+                <button type="button" class="secondary" id="loadJsonBtn" title="Restore a report from a previously downloaded JSON file. Useful for transferring between devices or after clearing browser data.">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Load from JSON
                 </button>
-                <button type="button" class="secondary" id="printBtn">
+                <button type="button" class="secondary" id="printBtn" title="Open the browser print dialog. Pick 'Save as PDF' to download a printable copy you can hand to the customer.">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                     Print to PDF
+                </button>
+                <button type="button" class="secondary demo-btn" id="fillDemoBtn" title="Fill the form with a complete sample report (Stellantis NV, Aartselaar). Use this to explore the app — you'll be asked before any existing data is overwritten.">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 2h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l-1-2z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+                    Fill Demo
                 </button>
                 <input type="file" id="jsonFileInput" accept="application/json,.json" aria-hidden="true">
             </div>
@@ -719,7 +1364,7 @@
 
         <h2>Saved Reports</h2>
         <div class="reports-toolbar">
-            <button type="button" class="secondary danger" id="clearAllBtn">
+            <button type="button" class="secondary danger" id="clearAllBtn" title="Permanently delete every saved report. Asks for confirmation.">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 Clear All
             </button>
@@ -737,31 +1382,32 @@
         function val(v) { return v && v.trim() ? v : '—'; }
 
         function newId() {
-            // crypto.randomUUID requires a secure context (HTTPS/localhost) and
-            // isn't available in older browsers. Try it, then fall back to
-            // crypto.getRandomValues (RFC 4122 v4 layout), then to Math.random.
-            try {
-                if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-                    return crypto.randomUUID();
-                }
-            } catch (_) { /* fall through */ }
-            try {
+            // 6-char base36 ID (0-9, A-Z) → 36^6 = ~2.18 billion combinations.
+            // Plenty for a single user's localStorage; we still check for collisions
+            // and re-roll if a generated ID is already in use.
+            const CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const reports = (typeof getReports === 'function') ? getReports() : [];
+            const existing = new Set(reports.map(r => r && r.id).filter(Boolean));
+
+            function roll() {
+                const bytes = new Uint8Array(6);
                 if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
-                    const bytes = new Uint8Array(16);
                     crypto.getRandomValues(bytes);
-                    bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
-                    bytes[8] = (bytes[8] & 0x3f) | 0x80; // RFC 4122 variant
-                    let hex = '';
-                    for (let i = 0; i < 16; i++) {
-                        hex += (bytes[i] < 16 ? '0' : '') + bytes[i].toString(16);
-                    }
-                    return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-' +
-                           hex.slice(12, 16) + '-' + hex.slice(16, 20) + '-' + hex.slice(20);
+                } else {
+                    for (let i = 0; i < 6; i++) bytes[i] = Math.floor(Math.random() * 256);
                 }
-            } catch (_) { /* fall through */ }
-            // Last resort — high-entropy timestamp + two random chunks
-            return 'rpt-' + Date.now().toString(36) + '-' +
-                   Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+                let id = '';
+                for (let i = 0; i < 6; i++) id += CHARS[bytes[i] % 36];
+                return id;
+            }
+
+            // Up to 100 re-rolls — collision is astronomically unlikely but stay safe
+            for (let i = 0; i < 100; i++) {
+                const id = roll();
+                if (!existing.has(id)) return id;
+            }
+            // Last-resort: timestamp-derived, padded to 6 chars
+            return Date.now().toString(36).toUpperCase().slice(-6).padStart(6, '0');
         }
 
         function setReportId(id) {
@@ -808,6 +1454,28 @@
             return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
 
+        // Date / time formatting helpers — always DD/MM/YYYY and 24-hour,
+        // independent of the browser's locale. `iso` is a YYYY-MM-DD string.
+        function formatDateDDMMYYYY(iso) {
+            if (!iso) return '—';
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso).trim());
+            if (!m) return String(iso);
+            return `${m[3]}/${m[2]}/${m[1]}`;
+        }
+        function formatTimeHHMM(hhmm) {
+            if (!hhmm) return '—';
+            const m = /^(\d{1,2}):(\d{2})/.exec(String(hhmm).trim());
+            if (!m) return String(hhmm);
+            return `${String(m[1]).padStart(2, '0')}:${m[2]}`;
+        }
+        function formatDateTimeDDMMYYYY(input) {
+            const d = (input instanceof Date) ? input : new Date(input);
+            if (isNaN(d.getTime())) return '—';
+            const dateStr = formatDateDDMMYYYY(d.toISOString().slice(0, 10));
+            const timeStr = formatTimeHHMM(d.toTimeString().slice(0, 5));
+            return `${dateStr} ${timeStr}`;
+        }
+
         function loadReports() {
             const reports = getReports();
             // Backfill unique IDs for reports saved before the id field existed
@@ -827,16 +1495,16 @@
             reportList.innerHTML = reports.map((r) => `
                 <div class="report-item">
                     <div class="report-actions">
-                        <button type="button" class="clone-btn" data-id="${escapeHtml(r.id)}">
+                        <button type="button" class="clone-btn" data-id="${escapeHtml(r.id)}" title="Copy this report's data into a fresh form. The new entry gets its own ID; signatures and time tables are wiped so you can re-sign.">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                             Clone
                         </button>
-                        <button type="button" class="delete-btn" data-id="${escapeHtml(r.id)}">
+                        <button type="button" class="delete-btn" data-id="${escapeHtml(r.id)}" title="Permanently delete this saved report.">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                             Delete
                         </button>
                     </div>
-                    <div class="meta">ID: ${escapeHtml(r.id) || '—'} &nbsp;•&nbsp; ${escapeHtml(r.date)}</div>
+                    <div class="meta">ID: ${escapeHtml(r.id) || '—'} &nbsp;•&nbsp; ${escapeHtml(formatDateTimeDDMMYYYY(r.date))}</div>
                     <div class="group">
                         <div class="group-label">Customer</div>
                         <div class="row"><strong>${val(r.customer)}</strong></div>
@@ -858,6 +1526,8 @@
                         <p class="notes">${val(r.notes)}</p>
                         ${r.steps && r.steps.length ? renderPsetsDisplay(r.steps) : ''}
                     </div>
+                    ${renderCardTimeTracking(r)}
+                    ${renderCardSignatures(r)}
                 </div>
             `).join('');
         }
@@ -875,7 +1545,7 @@
             if (cloneBtn) cloneBtn.disabled = false;
             cloneSourceEl.innerHTML = '<option value="">— Select a report to clone —</option>' +
                 reports.map(r => {
-                    const label = `${r.date} — ${val(r.customer)} (${(r.id || '').slice(0, 8)})`;
+                    const label = `${formatDateTimeDDMMYYYY(r.date)} — ${val(r.customer)} (${(r.id || '').slice(0, 8)})`;
                     return `<option value="${escapeHtml(r.id)}">${escapeHtml(label)}</option>`;
                 }).join('');
         }
@@ -888,6 +1558,8 @@
             fillForm(report);
             // A clone is a new report — give it a fresh unique ID
             setReportId();
+            // Signatures are session-only; cloning must not carry old ink from a previous form
+            if (typeof window.__clearAllSignatures === 'function') window.__clearAllSignatures();
             cloneSourceEl.value = '';
             window.scrollTo({ top: 0, behavior: 'smooth' });
             // Visible feedback
@@ -905,15 +1577,23 @@
             newReport.date = new Date().toLocaleString();
             // Attach optimization steps (only meaningful when intervention type is optimization)
             newReport.steps = collectSteps();
+            // Work time + travel time rows (each is an array of {label, start, end})
+            newReport.workTime = collectTimeRows('workTimeRows');
+            newReport.travelTime = collectTimeRows('travelTimeRows');
+            // Persist signatures with the report — they stay visible on the saved card
+            // and on the form (so the user can re-print the signed PDF without re-signing).
+            // They get cleared only on Clone, Clear button, or Load JSON.
+            newReport.signatures = collectSignatures();
             const reports = getReports();
             reports.push(newReport);
             saveReports(reports);
             lastSavedReport = newReport;
             loadReports();
-            // Prep the form for the next entry
+            // Assign a fresh ID for the next entry — but DO NOT clear signatures.
+            // They stay until the user explicitly clones or clears the form.
             setReportId();
             // Visible feedback: toast + scroll to the new card + flash highlight
-            showToast('✓ Report saved', 'success');
+            showToast('✓ Report saved (signatures preserved)', 'success');
             const newCard = document.querySelector(`.report-item [data-id="${newReport.id}"]`)?.closest('.report-item');
             if (newCard) {
                 newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -924,9 +1604,31 @@
             }
         });
 
+        // Helper to clear signatures (used on clone, reset, or JSON-load without sigs).
+        // Save Report does NOT call this — signatures persist with the report and on the form.
+        function clearAllSignatures() {
+            const clearCustomerBtn = document.getElementById('clearCustomerSig');
+            const clearTechnicianBtn = document.getElementById('clearTechnicianBtn');
+            if (clearCustomerBtn) clearCustomerBtn.click();
+            if (clearTechnicianBtn) clearTechnicianBtn.click();
+            enableSignaturesEl.checked = false;
+            signaturesSectionEl.hidden = true;
+            signaturesSectionEl.removeAttribute('data-print');
+            syncSignatureNames();
+        }
+        window.__clearAllSignatures = clearAllSignatures; // expose for any direct callers
+
         // Regenerate the unique ID after a Clear/reset so the next report starts fresh
         form.addEventListener('reset', () => {
-            setTimeout(setReportId, 0);
+            setTimeout(() => {
+                setReportId();
+                // Reset report date back to today
+                if (reportDateEl) reportDateEl.isoValue = todayIso();
+                // Clear work + travel time tables back to a single empty row
+                fillTimeRows('workTimeRows', []);
+                fillTimeRows('travelTimeRows', []);
+                clearAllSignatures();
+            }, 0);
         });
 
         // Clone button next to the dropdown
@@ -941,6 +1643,7 @@
         // Field id map for save/load JSON
         const fieldMap = {
             id: 'reportId',
+            reportDate: 'reportDate',
             customer: 'customerName',
             customerContact: 'customerContact',
             customerPhone: 'customerPhone',
@@ -960,7 +1663,14 @@
         function collectFormData() {
             const data = {};
             for (const [key, id] of Object.entries(fieldMap)) {
-                data[key] = document.getElementById(id).value;
+                const el = document.getElementById(id);
+                if (!el) continue;
+                // Custom date input exposes canonical YYYY-MM-DD via isoValue
+                if (key === 'reportDate') {
+                    data[key] = (typeof el.isoValue === 'string') ? el.isoValue : el.value;
+                } else {
+                    data[key] = el.value;
+                }
             }
             return data;
         }
@@ -968,7 +1678,13 @@
         function fillForm(data) {
             for (const [key, id] of Object.entries(fieldMap)) {
                 const el = document.getElementById(id);
-                if (el && data[key] !== undefined) el.value = data[key];
+                if (!el || data[key] === undefined) continue;
+                if (key === 'reportDate') {
+                    if (typeof el.isoValue === 'string') el.isoValue = data[key];
+                    else el.value = data[key];
+                } else {
+                    el.value = data[key];
+                }
             }
             // Steps are dynamic — not in fieldMap
             if (Array.isArray(data.steps)) {
@@ -976,6 +1692,9 @@
             } else {
                 fillSteps([]);
             }
+            // Work time + travel time rows are dynamic too
+            fillTimeRows('workTimeRows', Array.isArray(data.workTime) ? data.workTime : []);
+            fillTimeRows('travelTimeRows', Array.isArray(data.travelTime) ? data.travelTime : []);
             updateOptimizationVisibility();
         }
 
@@ -1095,6 +1814,590 @@
             }).filter(p => p.pset || p.rows.length); // skip completely empty Psets
         }
 
+        // ===== Custom date / time inputs =====
+// Native <input type="date"> / <input type="time"> honor the lang attribute only
+// on some browsers — many still show MM/DD/YYYY or AM/PM. We replace them with
+// custom text inputs that always display DD/MM/YYYY + HH:MM (24h), independent
+// of locale. Internal canonical value is exposed via `isoValue` / `hhmmValue`.
+
+// ---- Date input --------------------------------------------------------
+function makeCustomDate(inputEl, btnEl) {
+    let isoValue = '';
+
+    // Parse visible DD/MM/YYYY into canonical YYYY-MM-DD. Returns null if invalid.
+    function parseInput(text) {
+        const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(text || '').trim());
+        if (!m) return null;
+        const day = parseInt(m[1], 10);
+        const month = parseInt(m[2], 10);
+        const year = parseInt(m[3], 10);
+        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        const d = new Date(year, month - 1, day);
+        // Catches impossible dates like 31/02 or 29/02/non-leap-year
+        if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function setISO(iso, dispatch) {
+        isoValue = iso || '';
+        inputEl.value = isoValue ? formatDateDDMMYYYY(isoValue) : '';
+        if (dispatch) inputEl.dispatchEvent(new Event('datechange'));
+    }
+
+    // Auto-insert slashes as the user types digits
+    inputEl.addEventListener('input', (e) => {
+        let text = e.target.value.replace(/[^\d]/g, '');
+        if (text.length >= 3) text = text.slice(0, 2) + '/' + text.slice(2);
+        if (text.length >= 6) text = text.slice(0, 5) + '/' + text.slice(5, 9);
+        e.target.value = text.slice(0, 10);
+    });
+
+    function commit() {
+        if (inputEl.value.trim() === '') {
+            isoValue = '';
+            inputEl.dispatchEvent(new Event('datechange'));
+            return;
+        }
+        const iso = parseInput(inputEl.value);
+        if (iso) {
+            isoValue = iso;
+            inputEl.value = formatDateDDMMYYYY(iso);
+            inputEl.dispatchEvent(new Event('datechange'));
+        } else {
+            // Invalid — revert to last known good value
+            inputEl.value = isoValue ? formatDateDDMMYYYY(isoValue) : '';
+        }
+    }
+    inputEl.addEventListener('change', commit);
+    inputEl.addEventListener('blur', commit);
+
+    if (btnEl) {
+        btnEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            openCalendar(inputEl, isoValue, (newIso) => setISO(newIso, true));
+        });
+    }
+
+    // Dispatch `datechange` only when the canonical value actually changes,
+    // so external listeners (e.g. addTimeRow row totals) stay in sync.
+    Object.defineProperty(inputEl, 'isoValue', {
+        get() { return isoValue; },
+        set(v) {
+            const newVal = v || '';
+            setISO(v, newVal !== isoValue);
+        }
+    });
+}
+
+// ---- Time input --------------------------------------------------------
+function makeCustomTime(inputEl) {
+    let _value = ''; // canonical HH:MM
+
+    function setValue(v, dispatch) {
+        _value = v || '';
+        inputEl.value = _value ? formatTimeHHMM(_value) : '';
+        if (dispatch) inputEl.dispatchEvent(new Event('timechange'));
+    }
+
+    function parseInput(text) {
+        const m = /^(\d{1,2}):(\d{2})$/.exec(String(text || '').trim());
+        if (!m) return null;
+        const h = parseInt(m[1], 10);
+        const min = parseInt(m[2], 10);
+        if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+        return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+    }
+
+    // Auto-insert colon after 2 digits
+    inputEl.addEventListener('input', (e) => {
+        let text = e.target.value.replace(/[^\d]/g, '');
+        if (text.length >= 3) text = text.slice(0, 2) + ':' + text.slice(2, 4);
+        e.target.value = text.slice(0, 5);
+    });
+
+    function commit() {
+        if (inputEl.value.trim() === '') {
+            _value = '';
+            inputEl.dispatchEvent(new Event('timechange'));
+            return;
+        }
+        const v = parseInput(inputEl.value);
+        if (v) {
+            _value = v;
+            inputEl.value = formatTimeHHMM(v);
+            inputEl.dispatchEvent(new Event('timechange'));
+        } else {
+            // Invalid — revert to last known good value
+            inputEl.value = _value ? formatTimeHHMM(_value) : '';
+        }
+    }
+    inputEl.addEventListener('change', commit);
+    inputEl.addEventListener('blur', commit);
+
+    Object.defineProperty(inputEl, 'hhmmValue', {
+        get() { return _value; },
+        set(v) {
+            const newVal = v || '';
+            setValue(v, newVal !== _value);
+        }
+    });
+}
+
+// ---- Calendar popup ----------------------------------------------------
+function openCalendar(anchorEl, currentIso, onSelect) {
+    // Close any existing popup
+    const existing = document.getElementById('active-cal-popup');
+    if (existing) existing.remove();
+
+    const today = new Date();
+    let viewYear, viewMonth;
+    if (currentIso) {
+        const [y, m] = currentIso.split('-').map(Number);
+        viewYear = y; viewMonth = m - 1;
+    } else {
+        viewYear = today.getFullYear();
+        viewMonth = today.getMonth();
+    }
+    let selectedIso = currentIso || '';
+
+    const popup = document.createElement('div');
+    popup.id = 'active-cal-popup';
+    popup.className = 'cal-popup';
+    popup.innerHTML = `
+        <div class="cal-header">
+            <button type="button" class="cal-nav-btn cal-prev" aria-label="Previous month">‹</button>
+            <div class="cal-title"></div>
+            <button type="button" class="cal-nav-btn cal-next" aria-label="Next month">›</button>
+        </div>
+        <div class="cal-weekdays">
+            <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+        </div>
+        <div class="cal-days"></div>
+        <div class="cal-footer">
+            <button type="button" class="secondary cal-today">Today</button>
+            <button type="button" class="secondary cal-clear">Clear</button>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    // Position just below the anchor
+    const rect = anchorEl.getBoundingClientRect();
+    popup.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+    popup.style.left = Math.max(8, rect.left + window.scrollX) + 'px';
+    // If it would overflow right edge, shift left
+    const popupWidth = popup.offsetWidth;
+    const viewportRight = window.scrollX + window.innerWidth - 8;
+    if (rect.left + popupWidth > viewportRight) {
+        popup.style.left = (viewportRight - popupWidth) + 'px';
+    }
+
+    const titleEl = popup.querySelector('.cal-title');
+    const daysEl = popup.querySelector('.cal-days');
+
+    function render() {
+        titleEl.textContent = new Date(viewYear, viewMonth, 1)
+            .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+        daysEl.innerHTML = '';
+
+        const firstDay = new Date(viewYear, viewMonth, 1);
+        // Week starts Monday (0 = Mon, 6 = Sun)
+        let startOffset = firstDay.getDay() - 1;
+        if (startOffset < 0) startOffset = 6;
+        const startDate = new Date(viewYear, viewMonth, 1 - startOffset);
+
+        for (let i = 0; i < 42; i++) {
+            const d = new Date(startDate);
+            d.setDate(startDate.getDate() + i);
+            const isOtherMonth = d.getMonth() !== viewMonth;
+            const isToday = d.toDateString() === today.toDateString();
+            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const isSelected = iso === selectedIso;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cal-day'
+                + (isOtherMonth ? ' other-month' : '')
+                + (isToday ? ' today' : '')
+                + (isSelected ? ' selected' : '');
+            btn.textContent = d.getDate();
+            btn.addEventListener('click', () => {
+                selectedIso = iso;
+                onSelect(iso);
+                close();
+            });
+            daysEl.appendChild(btn);
+        }
+    }
+
+    function close() {
+        popup.remove();
+        document.removeEventListener('mousedown', onDocClick);
+        document.removeEventListener('keydown', onKey);
+    }
+    function onDocClick(e) {
+        if (!popup.contains(e.target) && e.target !== anchorEl && !anchorEl.contains(e.target) && e.target !== btnEl) {
+            close();
+        }
+    }
+    function onKey(e) {
+        if (e.key === 'Escape') close();
+    }
+    setTimeout(() => {
+        document.addEventListener('mousedown', onDocClick);
+        document.addEventListener('keydown', onKey);
+    }, 0);
+
+    popup.querySelector('.cal-prev').addEventListener('click', () => {
+        viewMonth--;
+        if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+        render();
+    });
+    popup.querySelector('.cal-next').addEventListener('click', () => {
+        viewMonth++;
+        if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+        render();
+    });
+    popup.querySelector('.cal-today').addEventListener('click', () => {
+        const t = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        selectedIso = t;
+        viewYear = today.getFullYear();
+        viewMonth = today.getMonth();
+        onSelect(t);
+        close();
+    });
+    popup.querySelector('.cal-clear').addEventListener('click', () => {
+        onSelect('');
+        close();
+    });
+
+    render();
+}
+        // Shared helper: compute human-readable duration between two HH:MM strings.
+        // - end > start  → simple difference (same day)
+        // - end < start  → rolled over midnight (next day)
+        // - end == start → 0 minutes (no rollover, prevents accidental 24h rows)
+        function durationBetween(start, end) {
+            if (!start || !end) return null;
+            const m1 = /^(\d{1,2}):(\d{2})$/.exec(start);
+            const m2 = /^(\d{1,2}):(\d{2})$/.exec(end);
+            if (!m1 || !m2) return null;
+            const sMin = parseInt(m1[1], 10) * 60 + parseInt(m1[2], 10);
+            const eMin = parseInt(m2[1], 10) * 60 + parseInt(m2[2], 10);
+            let total;
+            if (eMin > sMin) total = eMin - sMin;
+            else if (eMin < sMin) total = (eMin + 24 * 60) - sMin;
+            else total = 0;
+            const h = Math.floor(total / 60);
+            const m = total % 60;
+            return { total, hours: h, minutes: m, label: `${h}h ${String(m).padStart(2, '0')}m` };
+        }
+        function formatDuration(totalMin) {
+            if (!totalMin || totalMin <= 0) return '—';
+            const h = Math.floor(totalMin / 60);
+            const m = totalMin % 60;
+            return `${h}h ${String(m).padStart(2, '0')}m`;
+        }
+
+        // ===== Demo data filler =====
+        // Populates the form with a complete, realistic example (Stellantis NV — Aartselaar)
+        // so users can see what a filled report looks like. Asks for confirmation before
+        // overwriting any data already entered.
+        function fillDemoData() {
+            // Refuse to clobber existing data without confirmation
+            const hasExistingData = ['customerName', 'technicianName', 'toolSerial'].some(id => {
+                const el = document.getElementById(id);
+                return el && el.value && el.value.trim();
+            });
+            if (hasExistingData) {
+                if (!confirm('This will replace the current form data with the demo report. Continue?')) {
+                    return;
+                }
+            }
+
+            // -- Report date --
+            document.getElementById('reportDate').isoValue = '2025-12-04';
+
+            // -- Customer --
+            document.getElementById('customerName').value = 'Stellantis NV — Aartselaar Plant';
+            document.getElementById('customerContact').value = 'Jan Janssen';
+            document.getElementById('customerPhone').value = '+32 3 555 0123';
+            document.getElementById('customerEmail').value = 'j.janssen@stellantis.com';
+            document.getElementById('customerAddress').value = 'Industrieweg 100, 2630 Aartselaar, Belgium';
+
+            // -- Technician --
+            document.getElementById('technicianName').value = 'Pieter Peeters';
+            document.getElementById('technicianEmail').value = 'p.peeters@atlascopco.com';
+
+            // -- Equipment --
+            document.getElementById('controller').value = 'Power Focus 6000';
+            document.getElementById('controllerSerial').value = 'PF6-2024-00847';
+            document.getElementById('controllerFirmware').value = 'v3.2.1';
+            document.getElementById('toolType').value = 'QST 50-12CT';
+            document.getElementById('toolSerial').value = 'QT50-240-9981';
+
+            // -- Intervention --
+            document.getElementById('interventionType').value = 'Tightening Program Optimization';
+            document.getElementById('interventionType').dispatchEvent(new Event('change'));
+            document.getElementById('notes').value =
+                'Replaced controller firmware v3.1.4 → v3.2.1 and verified torque accuracy on the QST spindle at all program steps. Adjusted torque targets on Joint 1 (wheel hub) and Joint 2 (brake caliper) based on joint-rate analysis. All traces stored in PF6 logs under this report ID.';
+
+            // -- Work Time: 3 rows, total 6h 15m --
+            const workRows = document.getElementById('workTimeRows');
+            workRows.innerHTML = '';
+            const workData = [
+                { label: 'Diagnosis & setup',         start: '08:30', end: '10:15' },
+                { label: 'Firmware replacement',      start: '10:30', end: '12:45' },
+                { label: 'Optimization & validation', start: '13:15', end: '15:30' }
+            ];
+            workData.forEach(r => addTimeRow('workTimeRows', r));
+
+            // -- Travel Time: 2 rows, total 2h 30m --
+            const travelRows = document.getElementById('travelTimeRows');
+            travelRows.innerHTML = '';
+            const travelData = [
+                { label: 'Outbound to site', start: '06:45', end: '08:00' },
+                { label: 'Return to office', start: '15:45', end: '17:00' }
+            ];
+            travelData.forEach(r => addTimeRow('travelTimeRows', r));
+
+            // -- Optimization Psets: 2 psets with steps --
+            psetsContainer.innerHTML = '';
+            addPset({
+                pset: 'Joint 1 — Wheel hub',
+                rows: [
+                    { step: 'Torque step 3', before: '45 Nm', after: '42 Nm' },
+                    { step: 'Angle step 5',  before: '90°',   after: '95°'   }
+                ]
+            });
+            addPset({
+                pset: 'Joint 2 — Brake caliper',
+                rows: [
+                    { step: 'Torque step 2', before: '80 Nm', after: '78 Nm' }
+                ]
+            });
+
+            // -- Signatures: enable section + draw on canvases --
+            document.getElementById('enableSignatures').checked = true;
+            document.getElementById('enableSignatures').dispatchEvent(new Event('change'));
+
+            function drawSignature(canvasId, startX) {
+                const c = document.getElementById(canvasId);
+                const ctx = c.getContext('2d');
+                ctx.clearRect(0, 0, c.width, c.height);
+                ctx.strokeStyle = '#1a2530';
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(startX, 100);
+                ctx.bezierCurveTo(startX + 40, 70,  startX + 90, 130, startX + 140, 100);
+                ctx.bezierCurveTo(startX + 190, 70, startX + 220, 130, startX + 260, 100);
+                ctx.bezierCurveTo(startX + 300, 70, startX + 320, 120, startX + 340, 105);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(startX + 10, 140);
+                ctx.bezierCurveTo(startX + 100, 130, startX + 230, 155, startX + 340, 135);
+                ctx.stroke();
+            }
+            drawSignature('customerSig', 60);
+            drawSignature('technicianSig', 90);
+
+            const today = new Date().toLocaleDateString('en-GB');
+            document.getElementById('customerSigDate').textContent = today;
+            document.getElementById('technicianSigDate').textContent = today;
+
+            showToast('Demo data loaded — scroll to explore', 'success');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            form.classList.remove('flash');
+            void form.offsetWidth;
+            form.classList.add('flash');
+        }
+
+        document.getElementById('fillDemoBtn').addEventListener('click', fillDemoData);
+
+        function addTimeRow(tbodyId, data) {
+            data = data || {};
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="time-label" value="${escapeHtml(data.label || '')}" placeholder="e.g. Diagnosis"></td>
+                <td><input type="text" class="custom-time time-start" placeholder="HH:MM" maxlength="5" autocomplete="off" inputmode="numeric"></td>
+                <td><input type="text" class="custom-time time-end" placeholder="HH:MM" maxlength="5" autocomplete="off" inputmode="numeric"></td>
+                <td class="time-dur empty" data-dur>—</td>
+                <td class="col-time-rm"><button type="button" class="remove-row">Remove</button></td>
+            `;
+            const startEl = tr.querySelector('.time-start');
+            const endEl = tr.querySelector('.time-end');
+            const durEl = tr.querySelector('[data-dur]');
+            const totalId = tbodyId === 'workTimeRows' ? 'workTimeTotal' : 'travelTimeTotal';
+
+            // Initialize custom time inputs (adds input/change/blur handlers + hhmmValue property)
+            makeCustomTime(startEl);
+            makeCustomTime(endEl);
+
+            const updateDur = () => {
+                const d = durationBetween(startEl.hhmmValue, endEl.hhmmValue);
+                if (d && d.total > 0) {
+                    durEl.textContent = d.label;
+                    durEl.classList.remove('empty');
+                } else {
+                    durEl.textContent = '—';
+                    durEl.classList.add('empty');
+                }
+                recomputeTotal(tbodyId, totalId);
+            };
+            // Duration recomputes when the custom input commits a valid value
+            startEl.addEventListener('timechange', updateDur);
+            endEl.addEventListener('timechange', updateDur);
+
+            // Restore values from saved data (sets hhmmValue and updates display)
+            startEl.hhmmValue = data.start || '';
+            endEl.hhmmValue = data.end || '';
+
+            tr.querySelector('.remove-row').addEventListener('click', () => {
+                tr.remove();
+                recomputeTotal(tbodyId, totalId);
+            });
+            document.getElementById(tbodyId).appendChild(tr);
+            updateDur(); // initial render (covers restore-from-saved + covers hhmmValue setter that didn't fire)
+        }
+
+        function recomputeTotal(tbodyId, totalId) {
+            const tbody = document.getElementById(tbodyId);
+            const totalEl = document.getElementById(totalId);
+            if (!tbody || !totalEl) return;
+            let sum = 0;
+            tbody.querySelectorAll('tr').forEach(tr => {
+                const s = tr.querySelector('.time-start').value;
+                const e = tr.querySelector('.time-end').value;
+                const d = durationBetween(s, e);
+                if (d) sum += d.total;
+            });
+            totalEl.textContent = sum > 0 ? formatDuration(sum) : '—';
+        }
+
+        function collectTimeRows(tbodyId) {
+            const rows = Array.from(document.getElementById(tbodyId).querySelectorAll('tr'));
+            return rows.map(tr => {
+                const startEl = tr.querySelector('.time-start');
+                const endEl = tr.querySelector('.time-end');
+                return {
+                    label: tr.querySelector('.time-label').value.trim(),
+                    // hhmmValue returns canonical HH:MM; value returns the visible text
+                    start: (startEl.hhmmValue !== undefined ? startEl.hhmmValue : startEl.value) || '',
+                    end: (endEl.hhmmValue !== undefined ? endEl.hhmmValue : endEl.value) || ''
+                };
+            }).filter(r => r.label || r.start || r.end); // skip totally empty rows
+        }
+
+        function fillTimeRows(tbodyId, rows) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+            if (Array.isArray(rows) && rows.length) {
+                rows.forEach(r => addTimeRow(tbodyId, r));
+            } else {
+                addTimeRow(tbodyId);
+            }
+        }
+
+        document.getElementById('addWorkTimeBtn').addEventListener('click', () => addTimeRow('workTimeRows'));
+        document.getElementById('addTravelTimeBtn').addEventListener('click', () => addTimeRow('travelTimeRows'));
+
+        // Render work/travel time tables inside a saved report card
+        function renderCardTimeTracking(r) {
+            const wt = Array.isArray(r.workTime) ? r.workTime.filter(x => x && (x.label || x.start || x.end)) : [];
+            const tt = Array.isArray(r.travelTime) ? r.travelTime.filter(x => x && (x.label || x.start || x.end)) : [];
+            if (!wt.length && !tt.length) return '';
+            const renderTable = (rows, headerLabel) => {
+                let total = 0;
+                const body = rows.map(row => {
+                    const d = durationBetween(row.start, row.end);
+                    if (d) total += d.total;
+                    return `
+                        <tr>
+                            <td>${escapeHtml(row.label) || '—'}</td>
+                            <td>${escapeHtml(row.start) || '—'}</td>
+                            <td>${escapeHtml(row.end) || '—'}</td>
+                            <td class="time-dur">${d ? escapeHtml(d.label) : '—'}</td>
+                        </tr>
+                    `;
+                }).join('');
+                return `
+                    <div class="card-time-block">
+                        <span class="card-signatures-label">${escapeHtml(headerLabel)}</span>
+                        <table class="time-table" style="margin-top:0;">
+                            <thead>
+                                <tr><th>Label</th><th>Start</th><th>End</th><th>Time spent</th></tr>
+                            </thead>
+                            <tbody>${body}</tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="time-total-label">Total</td>
+                                    <td class="time-total-value">${total > 0 ? formatDuration(total) : '—'}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+            };
+            return `
+                <div class="card-time-tracking">
+                    ${wt.length ? renderTable(wt, 'Work Time') : ''}
+                    ${tt.length ? renderTable(tt, 'Travel Time') : ''}
+                </div>
+            `;
+        }
+
+        // Render signatures inside a saved report card (form view only — print hides these)
+        function renderCardSignatures(r) {
+            const sigs = r.signatures;
+            if (!sigs || !sigs.enabled) return '';
+            const cust = sigs.customer || {};
+            const tech = sigs.technician || {};
+            if (!cust.dataUrl && !tech.dataUrl) return '';
+            // Pull names from the form fields stored in the report (matches what's on the sig block)
+            const custName = (r.customerContact && r.customerContact.trim()) || r.customer || 'Customer';
+            const techName = r.technician || 'Technician';
+            const bothSigned = !!(cust.dataUrl && tech.dataUrl);
+            const placeholderStyle = 'color:#b0b5b9;font-style:italic;font-weight:400;';
+            return `
+                <div class="card-signatures">
+                    <span class="card-signatures-label">Signatures</span>
+                    <div class="card-signatures-grid">
+                        ${cust.dataUrl ? `
+                            <div class="card-signature">
+                                <img src="${cust.dataUrl}" alt="Customer signature">
+                                <div class="card-sig-name">${escapeHtml(custName)}</div>
+                                <div class="card-sig-date">${escapeHtml(cust.date || '—')}</div>
+                            </div>
+                        ` : `
+                            <div class="card-signature">
+                                <div style="height:60px;display:flex;align-items:center;justify-content:center;color:#b0b5b9;font-style:italic;font-size:0.85rem;">Customer signature not provided</div>
+                                <div class="card-sig-name" style="${placeholderStyle}">${escapeHtml(custName)}</div>
+                                <div class="card-sig-date">—</div>
+                            </div>
+                        `}
+                        ${tech.dataUrl ? `
+                            <div class="card-signature">
+                                <img src="${tech.dataUrl}" alt="Technician signature">
+                                <div class="card-sig-name">${escapeHtml(techName)}</div>
+                                <div class="card-sig-date">${escapeHtml(tech.date || '—')}</div>
+                            </div>
+                        ` : `
+                            <div class="card-signature">
+                                <div style="height:60px;display:flex;align-items:center;justify-content:center;color:#b0b5b9;font-style:italic;font-size:0.85rem;">Technician signature not provided</div>
+                                <div class="card-sig-name" style="${placeholderStyle}">${escapeHtml(techName)}</div>
+                                <div class="card-sig-date">—</div>
+                            </div>
+                        `}
+                    </div>
+                    ${bothSigned ? `
+                        <div class="card-sig-statement">
+                            This document has been signed by the customer and the technician.
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
         // Render Psets inside a saved report card
         function renderPsetsDisplay(steps) {
             // Detect legacy flat format at the array level: [{step, before, after}, ...]
@@ -1155,12 +2458,250 @@
         interventionTypeEl.addEventListener('change', updateOptimizationVisibility);
         document.getElementById('addPsetBtn').addEventListener('click', () => addPset());
 
+        // ===== Signature pads (session-only — NOT saved anywhere) =====
+        const enableSignaturesEl = document.getElementById('enableSignatures');
+        const signaturesSectionEl = document.getElementById('signaturesSection');
+
+        function setupSignaturePad(canvasId, imgId, clearBtnId, dateSpanId) {
+            const canvas = document.getElementById(canvasId);
+            const img = document.getElementById(imgId);
+            const clearBtn = document.getElementById(clearBtnId);
+            const dateSpan = document.getElementById(dateSpanId);
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            let lastX = 0, lastY = 0;
+            let hasInk = false;
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const point = e.touches ? e.touches[0] : e;
+                return {
+                    x: (point.clientX - rect.left) * scaleX,
+                    y: (point.clientY - rect.top) * scaleY
+                };
+            }
+
+            function start(e) {
+                e.preventDefault();
+                drawing = true;
+                const pos = getPos(e);
+                lastX = pos.x; lastY = pos.y;
+            }
+
+            function move(e) {
+                if (!drawing) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.strokeStyle = '#1a2530';
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+                lastX = pos.x; lastY = pos.y;
+                hasInk = true;
+                canvas.classList.remove('empty');
+            }
+
+            function end() {
+                if (drawing) {
+                    drawing = false;
+                    syncToImg();
+                    syncDate();
+                }
+            }
+
+            function syncToImg() {
+                try {
+                    img.src = canvas.toDataURL('image/png');
+                } catch (_) { /* tainted canvas fallback — shouldn't happen since no cross-origin content */ }
+            }
+
+            function syncDate() {
+                if (hasInk && dateSpan) {
+                    const today = new Date();
+                    dateSpan.textContent = today.toLocaleDateString();
+                }
+            }
+
+            // Pointer events handle mouse + touch + pen uniformly
+            canvas.addEventListener('pointerdown', start);
+            canvas.addEventListener('pointermove', move);
+            canvas.addEventListener('pointerup', end);
+            canvas.addEventListener('pointercancel', end);
+            canvas.addEventListener('pointerleave', end);
+
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.classList.add('empty');
+                img.src = '';
+                hasInk = false;
+                if (dateSpan) dateSpan.textContent = '—';
+            });
+
+            // Restore a previously-saved signature (e.g. when loading JSON or cloning-with-sig)
+            function loadFromDataUrl(dataUrl) {
+                return new Promise((resolve, reject) => {
+                    const loader = new Image();
+                    loader.onload = () => {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(loader, 0, 0, canvas.width, canvas.height);
+                        canvas.classList.remove('empty');
+                        hasInk = true;
+                        syncToImg();
+                        resolve();
+                    };
+                    loader.onerror = () => reject(new Error('Failed to load signature image'));
+                    loader.src = dataUrl;
+                });
+            }
+
+            return {
+                syncToImg,
+                syncDate,
+                loadFromDataUrl,
+                // Check actual canvas pixels, not the in-memory flag — works even if signatures
+                // were added programmatically (e.g. by tests) without firing pointer events.
+                isEmpty: () => {
+                    if (hasInk) return false;
+                    try {
+                        const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                        for (let i = 3; i < data.length; i += 4) {
+                            if (data[i] !== 0) return false;
+                        }
+                        return true;
+                    } catch (_) { return !hasInk; }
+                }
+            };
+        }
+
+        const customerPad = setupSignaturePad('customerSig', 'customerSigImg', 'clearCustomerSig', 'customerSigDate');
+        const technicianPad = setupSignaturePad('technicianSig', 'technicianSigImg', 'clearTechnicianSig', 'technicianSigDate');
+
+        // Capture current signature state for save / JSON export.
+        // Signatures are persisted with the report — they survive Save Report and
+        // are only cleared on Clone, Clear button, or Load JSON.
+        function collectSignatures() {
+            if (!enableSignaturesEl.checked) {
+                return { enabled: false };
+            }
+            return {
+                enabled: true,
+                customer: {
+                    dataUrl: customerPad.isEmpty() ? null : document.getElementById('customerSig').toDataURL('image/png'),
+                    date: customerPad.isEmpty() ? null : (document.getElementById('customerSigDate').textContent || null)
+                },
+                technician: {
+                    dataUrl: technicianPad.isEmpty() ? null : document.getElementById('technicianSig').toDataURL('image/png'),
+                    date: technicianPad.isEmpty() ? null : (document.getElementById('technicianSigDate').textContent || null)
+                }
+            };
+        }
+
+        // Restore signatures from saved data (used on JSON load).
+        async function restoreSignatures(sigs) {
+            // If the JSON says signatures are disabled, keep the section hidden.
+            // If enabled (or the field is missing), show the section.
+            const enabled = sigs.enabled !== false;
+            enableSignaturesEl.checked = enabled;
+            signaturesSectionEl.hidden = !enabled;
+            syncSignatureNames();
+            if (!enabled) return;
+            try {
+                if (sigs.customer && sigs.customer.dataUrl) {
+                    await customerPad.loadFromDataUrl(sigs.customer.dataUrl);
+                    if (sigs.customer.date) document.getElementById('customerSigDate').textContent = sigs.customer.date;
+                }
+                if (sigs.technician && sigs.technician.dataUrl) {
+                    await technicianPad.loadFromDataUrl(sigs.technician.dataUrl);
+                    if (sigs.technician.date) document.getElementById('technicianSigDate').textContent = sigs.technician.date;
+                }
+            } catch (err) {
+                console.error('Failed to restore signatures:', err);
+            }
+        }
+
+        // Auto-fill signature names from the existing form fields:
+        //   Customer signature name ← Customer Contact Name (top of form)
+        //   Technician signature name ← Technician Name (top of form)
+        // The names below each signature are read-only — they reflect what's already in the form.
+        function syncSignatureNames() {
+            const contact = document.getElementById('customerContact').value.trim();
+            const technician = document.getElementById('technicianName').value.trim();
+            const customerNameSig = document.getElementById('customerNameSig');
+            const technicianNameSig = document.getElementById('technicianNameSig');
+            customerNameSig.textContent = contact || '—';
+            customerNameSig.dataset.empty = contact ? 'false' : 'true';
+            technicianNameSig.textContent = technician || '—';
+            technicianNameSig.dataset.empty = technician ? 'false' : 'true';
+        }
+        // Refresh whenever the source fields change
+        document.getElementById('customerContact').addEventListener('input', syncSignatureNames);
+        document.getElementById('technicianName').addEventListener('input', syncSignatureNames);
+        // Initial fill (so toggling the signature section shows names immediately if filled)
+        syncSignatureNames();
+
+        enableSignaturesEl.addEventListener('change', () => {
+            const on = enableSignaturesEl.checked;
+            signaturesSectionEl.hidden = !on;
+            if (on) {
+                syncSignatureNames();
+                // Only fill today's date if the date is empty — preserves a restored signing date
+                const today = new Date().toLocaleDateString();
+                const customerDateEl = document.getElementById('customerSigDate');
+                const technicianDateEl = document.getElementById('technicianSigDate');
+                if (!customerPad.isEmpty() && (!customerDateEl.textContent || customerDateEl.textContent === '—')) {
+                    customerDateEl.textContent = today;
+                }
+                if (!technicianPad.isEmpty() && (!technicianDateEl.textContent || technicianDateEl.textContent === '—')) {
+                    technicianDateEl.textContent = today;
+                }
+            }
+        });
+
+        // Sync canvas images to <img> elements right before printing
+        function syncSignaturesForPrint() {
+            if (!enableSignaturesEl.checked) {
+                signaturesSectionEl.removeAttribute('data-print');
+                return;
+            }
+            customerPad.syncToImg();
+            technicianPad.syncToImg();
+            // Only set today's date if the date span is empty — preserves the original
+            // signing date when re-printing a saved report days/weeks later.
+            const today = new Date().toLocaleDateString();
+            const customerDateEl = document.getElementById('customerSigDate');
+            const technicianDateEl = document.getElementById('technicianSigDate');
+            if (!customerPad.isEmpty() && (!customerDateEl.textContent || customerDateEl.textContent === '—')) {
+                customerDateEl.textContent = today;
+            }
+            if (!technicianPad.isEmpty() && (!technicianDateEl.textContent || technicianDateEl.textContent === '—')) {
+                technicianDateEl.textContent = today;
+            }
+            signaturesSectionEl.setAttribute('data-print', 'on');
+        }
+
         // Save current form data to a JSON file
         document.getElementById('saveJsonBtn').addEventListener('click', () => {
             let data = collectFormData();
             // Attach dynamic steps table (not in fieldMap)
             data.steps = collectSteps();
-            const hasData = Object.values(data).some(v => v && v.trim()) || (data.steps && data.steps.length);
+            // Attach work + travel time rows
+            data.workTime = collectTimeRows('workTimeRows');
+            data.travelTime = collectTimeRows('travelTimeRows');
+            // Attach signatures so the JSON round-trip preserves them
+            data.signatures = collectSignatures();
+            // `hasData` checks across scalars (strings, dates) AND non-empty arrays —
+            // signatures is an object so it's excluded (presence implies intent)
+            const hasData = Object.values(data).some(v => {
+                if (typeof v === 'string') return v.trim().length > 0;
+                if (Array.isArray(v)) return v.length > 0;
+                return false;
+            });
             if (!hasData && lastSavedReport) data = { ...lastSavedReport };
             data.savedAt = new Date().toLocaleString();
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1186,10 +2727,16 @@
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => {
+            reader.onload = async (ev) => {
                 try {
                     const data = JSON.parse(ev.target.result);
                     fillForm(data);
+                    // Restore signatures if the JSON has them; otherwise clear the pads
+                    if (data.signatures) {
+                        await restoreSignatures(data.signatures);
+                    } else {
+                        if (typeof window.__clearAllSignatures === 'function') window.__clearAllSignatures();
+                    }
                     showToast('✓ Form loaded from JSON', 'success');
                 } catch (err) {
                     showToast('Invalid JSON file: ' + err.message, 'error');
@@ -1203,6 +2750,8 @@
         // Print to PDF — uses the browser's built-in print dialog (Cmd/Ctrl+P),
         // and the @media print CSS strips buttons and shows a clean layout.
         document.getElementById('printBtn').addEventListener('click', () => {
+            // Sync canvas → img mirror so signatures render on the printed PDF
+            if (typeof syncSignaturesForPrint === 'function') syncSignaturesForPrint();
             window.print();
         });
 
@@ -1238,10 +2787,35 @@
             }
         });
 
-        // Initial setup: ensure the form has a unique ID and the dropdown is populated
+        // Initial setup: ensure the form has a unique ID, defaults, and the dropdown is populated
+        function todayIso() {
+            const d = new Date();
+            const tzOffset = d.getTimezoneOffset() * 60000;
+            return new Date(d.getTime() - tzOffset).toISOString().slice(0, 10);
+        }
+        // Wire the custom date input (DD/MM/YYYY display + calendar popup)
+        const reportDateEl = document.getElementById('reportDate');
+        const reportDateBtn = document.getElementById('reportDateBtn');
+        if (reportDateEl) makeCustomDate(reportDateEl, reportDateBtn);
+        // Pre-fill the report date with today if empty (user can still edit)
+        if (reportDateEl && !reportDateEl.isoValue) reportDateEl.isoValue = todayIso();
         setReportId();
         updateOptimizationVisibility();
+        // Seed each time table with one empty row so the UI is obvious
+        fillTimeRows('workTimeRows', []);
+        fillTimeRows('travelTimeRows', []);
         loadReports();
+
+        // ===== PWA: register service worker for offline / installable use =====
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('Service worker registered:', reg.scope);
+                }).catch(err => {
+                    console.warn('Service worker registration failed:', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
