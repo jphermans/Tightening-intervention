@@ -860,10 +860,24 @@
     letter-spacing: 0.02em;
 }
 .custom-time::placeholder { color: #b0b5b9; }
+        .time-table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            /* Subtle hint that the table can scroll horizontally on narrow screens */
+            border: 1px solid #d1d4d7;
+            border-radius: 4px;
+            background: #fff;
+            margin-top: 6px;
+        }
+        .time-table-scroll .time-table {
+            border: none;
+            border-radius: 0;
+            margin-top: 0;
+        }
         .time-table {
             width: 100%;
+            min-width: 480px; /* forces horizontal scroll on screens narrower than ~520px */
             border-collapse: collapse;
-            margin-top: 6px;
             background: #fff;
         }
         .time-table th,
@@ -1162,6 +1176,9 @@
             .card-signatures { display: none !important; }
             /* Saved-card time tracking SHOULD print (it's part of the report record) */
             .card-time-tracking { display: block !important; }
+            /* Time-table scroll wrapper: disable scroll for print, no min-width */
+            .time-table-scroll { overflow: visible !important; border: none !important; }
+            .time-table-scroll .time-table { min-width: 0 !important; }
         }
 
         /* Saved-card time-tracking block (printed AND visible in form view) */
@@ -1207,8 +1224,18 @@
             form { padding: 18px; }
             .grid { grid-template-columns: 1fr; gap: 0; }
             .actions { flex-direction: column; }
-            button { width: 100%; }
+            /* Only the bottom action buttons go full-width on mobile.
+               The custom-date-btn (calendar picker), inline-group buttons,
+               and signature-pad buttons keep their natural size. */
+            .actions > button { width: 100%; }
             .report-item { padding: 14px; }
+            /* Stack form padding tighter; allow fields to breathe */
+            .field { margin-bottom: 12px; }
+            /* Saved card rows reflow on small screens */
+            .report-item .row { font-size: 0.88rem; }
+            /* Time-table cells get a tiny bit more room */
+            .time-table th,
+            .time-table td { padding: 8px 6px; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -1337,8 +1364,9 @@
 
             <div class="section-title">Work Time</div>
             <p class="field-hint">Record the time you actually worked on the intervention. Multiple rows let you split a session (e.g., diagnose → repair → test).</p>
-            <table class="time-table">
-                <thead>
+            <div class="time-table-scroll">
+                <table class="time-table">
+                    <thead>
                     <tr>
                         <th class="col-time-label" title="A short label for this block of work, e.g. 'Diagnosis', 'Firmware replacement', 'Calibration check'.">Activity</th>
                         <th class="col-time-start" title="When you started this block. Use 24-hour format HH:MM, e.g. 08:30 or 14:00.">Start</th>
@@ -1347,15 +1375,16 @@
                         <th class="col-time-rm"></th>
                     </tr>
                 </thead>
-                <tbody id="workTimeRows"></tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="time-total-label">Total work time</td>
-                        <td class="time-total-value" id="workTimeTotal" title="Sum of every work-time row above.">—</td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-            </table>
+                    <tbody id="workTimeRows"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="time-total-label">Total work time</td>
+                            <td class="time-total-value" id="workTimeTotal" title="Sum of every work-time row above.">—</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
             <button type="button" class="secondary add-step-btn" id="addWorkTimeBtn" title="Add another row — useful when you took a break or the work was split across multiple activities.">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add work time row
@@ -1363,25 +1392,27 @@
 
             <div class="section-title">Travel Time</div>
             <p class="field-hint">Record the travel to and from the site. Multiple rows for outbound and return trips.</p>
-            <table class="time-table">
-                <thead>
-                    <tr>
-                        <th class="col-time-label" title="Which trip this is, e.g. 'Outbound to site', 'Return to office'.">Leg</th>
-                        <th class="col-time-start" title="When you departed, in 24-hour HH:MM.">Departure</th>
-                        <th class="col-time-end" title="When you arrived at the destination, in 24-hour HH:MM.">Arrival</th>
-                        <th class="col-time-dur" title="Automatically calculated from Departure and Arrival.">Time spent</th>
-                        <th class="col-time-rm"></th>
-                    </tr>
-                </thead>
-                <tbody id="travelTimeRows"></tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="time-total-label">Total travel time</td>
-                        <td class="time-total-value" id="travelTimeTotal" title="Sum of every travel row above.">—</td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-            </table>
+            <div class="time-table-scroll">
+                <table class="time-table">
+                    <thead>
+                        <tr>
+                            <th class="col-time-label" title="Which trip this is, e.g. 'Outbound to site', 'Return to office'.">Leg</th>
+                            <th class="col-time-start" title="When you departed, in 24-hour HH:MM.">Departure</th>
+                            <th class="col-time-end" title="When you arrived at the destination, in 24-hour HH:MM.">Arrival</th>
+                            <th class="col-time-dur" title="Automatically calculated from Departure and Arrival.">Time spent</th>
+                            <th class="col-time-rm"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="travelTimeRows"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="time-total-label">Total travel time</td>
+                            <td class="time-total-value" id="travelTimeTotal" title="Sum of every travel row above.">—</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
             <button type="button" class="secondary add-step-btn" id="addTravelTimeBtn" title="Add another row — outbound and return are tracked separately so the customer can see the full trip time.">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add travel time row
