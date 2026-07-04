@@ -180,6 +180,13 @@
                 padding: 16pt 1.2cm !important;
                 margin: 0 -1.2cm 10pt !important;
                 box-shadow: none !important;
+                /* Neutralize the sticky positioning from the screen layout —
+                   sticky/absolute positioning in print causes the header to
+                   land on the wrong page in some browsers. Reset to normal
+                   in-flow block so it renders at the top of page 1. */
+                position: static !important;
+                top: auto !important;
+                z-index: auto !important;
                 /* The header is a single block element so it naturally appears only on the
                    first page — no need to suppress it on later pages. */
                 page-break-after: avoid;
