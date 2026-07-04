@@ -500,6 +500,64 @@
         .toast.error { background: #c0392b; }
         .toast button:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* ===== Confirmation modal (replaces native confirm()) ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.18s;
+        }
+        .modal-overlay.show { opacity: 1; }
+        .modal-box {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+            max-width: 420px;
+            width: calc(100% - 32px);
+            padding: 24px;
+            transform: scale(0.95);
+            transition: transform 0.18s;
+        }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--ac-charcoal);
+            margin: 0 0 10px;
+        }
+        .modal-message {
+            font-size: 0.92rem;
+            color: var(--ac-grey);
+            line-height: 1.5;
+            margin: 0 0 20px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .modal-actions button { padding: 9px 20px; font-size: 0.9rem; }
+        .modal-actions .modal-cancel {
+            background: transparent;
+            color: var(--ac-grey);
+            border: 1px solid #d1d4d7;
+        }
+        .modal-actions .modal-cancel:hover { background: #f0f2f3; }
+        .modal-actions .modal-confirm.danger {
+            background: #c0392b;
+        }
+        .modal-actions .modal-confirm.danger:hover {
+            background: #a93226;
+        }
+        @media print {
+            .modal-overlay { display: none !important; }
+        }
+
         /* Briefly highlight a freshly-saved card */
         @keyframes flash {
             0% { background: var(--ac-tint); }
@@ -939,6 +997,12 @@
     font-weight: 700;
 }
 .cal-day.selected:hover { background: var(--ac-primary-dark) !important; }
+/* Keyboard navigation cursor — visible outline ring. Dimmed if it's also an other-month day. */
+.cal-day.focus {
+    outline: 2px solid var(--ac-primary-light);
+    outline-offset: -2px;
+}
+.cal-day.focus.other-month { outline-color: var(--ac-grey); }
 .cal-footer {
     display: flex;
     justify-content: space-between;
@@ -1065,13 +1129,6 @@
             font-variant-numeric: tabular-nums;
             font-size: 0.95rem;
         }
-        @media (max-width: 600px) {
-            .time-table .col-time-label,
-            .time-table .col-time-start,
-            .time-table .col-time-end,
-            .time-table .col-time-dur { width: auto; }
-            .time-table th, .time-table td { padding: 5px 4px; font-size: 0.82rem; }
-        }
         /* Saved card display */
         .pset-display {
             margin-top: 8px;
@@ -1085,11 +1142,6 @@
             color: var(--ac-primary-dark);
             margin-bottom: 4px;
             font-size: 0.92rem;
-        }
-        @media (max-width: 600px) {
-            .pset-block-header { flex-direction: column; align-items: stretch; }
-            .pset-block-header .pset-name { min-width: 0; }
-            .pset-block-header .remove-pset { width: 100%; }
         }
 
         /* Signature section */
@@ -1207,9 +1259,6 @@
             font-size: 0.9rem;
             color: var(--ac-charcoal);
             font-weight: 600;
-        }
-        @media (max-width: 600px) {
-            .signatures-grid { grid-template-columns: 1fr; }
         }
 
         /* Attachments / images section (between Notes and Work Time) */
@@ -1451,9 +1500,6 @@
             font-weight: 600;
             color: var(--ac-charcoal);
         }
-        @media (max-width: 600px) {
-            .card-signatures-grid { grid-template-columns: 1fr; }
-        }
 
         /* Print: only the current form's signature section prints —
            saved-card signatures stay in the form view for audit, but not on paper */
@@ -1503,7 +1549,9 @@
         }
         .report-item .clone-btn:hover { background: var(--ac-tint); }
 
+        /* ===== Mobile responsive (all @media max-width:600px rules consolidated) ===== */
         @media (max-width: 600px) {
+            /* Layout & typography */
             header h1 { font-size: 1.3rem; }
             .container { padding: 0 12px; }
             form { padding: 18px; }
@@ -1513,14 +1561,29 @@
                The custom-date-btn (calendar picker), inline-group buttons,
                and signature-pad buttons keep their natural size. */
             .actions > button { width: 100%; }
+
+            /* Form fields & saved cards */
             .report-item { padding: 14px; }
-            /* Stack form padding tighter; allow fields to breathe */
             .field { margin-bottom: 12px; }
-            /* Saved card rows reflow on small screens */
             .report-item .row { font-size: 0.88rem; }
-            /* Time-table cells get a tiny bit more room */
+
+            /* Time tables */
+            .time-table .col-time-label,
+            .time-table .col-time-start,
+            .time-table .col-time-end,
+            .time-table .col-time-dur { width: auto; }
+            .time-table th, .time-table td { padding: 5px 4px; font-size: 0.82rem; }
             .time-table th,
             .time-table td { padding: 8px 6px; font-size: 0.85rem; }
+
+            /* Pset blocks stack vertically */
+            .pset-block-header { flex-direction: column; align-items: stretch; }
+            .pset-block-header .pset-name { min-width: 0; }
+            .pset-block-header .remove-pset { width: 100%; }
+
+            /* Signature grids collapse to single column */
+            .signatures-grid { grid-template-columns: 1fr; }
+            .card-signatures-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -1810,6 +1873,10 @@
             </div>
             <div class="reports-body" id="reportsBody">
                 <div class="reports-toolbar">
+                    <button type="button" class="secondary" id="exportAllBtn" title="Download every saved report as a single JSON backup file. Use this to safeguard your data before clearing the browser or switching devices.">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Export All
+                    </button>
                     <button type="button" class="secondary danger" id="clearAllBtn" title="Permanently delete every saved report. Asks for confirmation.">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         Clear All
@@ -1880,7 +1947,7 @@
         };
 
         function getReports() { return JSON.parse(storage.get('reports', '[]')); }
-        function saveReports(reports) { storage.set('reports', JSON.stringify(reports)); }
+        function saveReports(reports) { return storage.set('reports', JSON.stringify(reports)); }
         function clearReports() { storage.remove('reports'); }
 
         // Toast notifications — give the user visible feedback for every action
@@ -1896,6 +1963,48 @@
                 el.classList.remove('show');
                 setTimeout(() => el.remove(), 250);
             }, 2600);
+        }
+
+        // Styled confirmation modal — replaces native confirm().
+        // Returns a Promise<boolean>: true = confirm, false = cancel.
+        function confirmDialog(opts) {
+            opts = opts || {};
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.innerHTML = `
+                    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                        <h3 class="modal-title" id="modalTitle">${escapeHtml(opts.title || 'Please confirm')}</h3>
+                        <p class="modal-message">${escapeHtml(opts.message || '')}</p>
+                        <div class="modal-actions">
+                            <button type="button" class="modal-cancel">Cancel</button>
+                            <button type="button" class="modal-confirm ${opts.danger ? 'danger' : ''}">${escapeHtml(opts.confirmText || 'Confirm')}</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                requestAnimationFrame(() => overlay.classList.add('show'));
+
+                let resolved = false;
+                function done(result) {
+                    if (resolved) return;
+                    resolved = true;
+                    overlay.classList.remove('show');
+                    setTimeout(() => overlay.remove(), 180);
+                    document.removeEventListener('keydown', onKey);
+                    resolve(result);
+                }
+                function onKey(e) {
+                    if (e.key === 'Escape') done(false);
+                    if (e.key === 'Enter') done(true);
+                }
+                overlay.querySelector('.modal-cancel').addEventListener('click', () => done(false));
+                overlay.querySelector('.modal-confirm').addEventListener('click', () => done(true));
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) done(false); });
+                // Focus the confirm button so Enter works immediately
+                setTimeout(() => overlay.querySelector('.modal-confirm').focus(), 50);
+                document.addEventListener('keydown', onKey);
+            });
         }
 
         function escapeHtml(s) {
@@ -2102,7 +2211,16 @@
             newReport.attachments = collectAttachments();
             const reports = getReports();
             reports.push(newReport);
-            saveReports(reports);
+            const saved = saveReports(reports);
+            if (!saved) {
+                // localStorage quota exceeded (too many attachments) or Safari private mode.
+                // The report is NOT persisted — warn clearly and offer a JSON download
+                // so the user doesn't lose the data they just entered.
+                showToast('⚠ Storage full — report NOT saved. Downloading JSON backup…', 'error');
+                downloadJson(newReport);
+                lastSavedReport = newReport;
+                return;
+            }
             lastSavedReport = newReport;
             loadReports();
             // Assign a fresh ID for the next entry — but DO NOT clear signatures.
@@ -2488,6 +2606,12 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         viewMonth = today.getMonth();
     }
     let selectedIso = currentIso || '';
+    // Keyboard navigation cursor — the date the user is currently on with arrow keys.
+    // Starts on the selected date, or today, or the 1st of the month.
+    let cursorIso = selectedIso;
+    if (!cursorIso) {
+        cursorIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
 
     const popup = document.createElement('div');
     popup.id = 'active-cal-popup';
@@ -2541,13 +2665,16 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             const isToday = d.toDateString() === today.toDateString();
             const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
             const isSelected = iso === selectedIso;
+            const isCursor = iso === cursorIso;
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'cal-day'
                 + (isOtherMonth ? ' other-month' : '')
                 + (isToday ? ' today' : '')
-                + (isSelected ? ' selected' : '');
+                + (isSelected ? ' selected' : '')
+                + (isCursor ? ' focus' : '');
             btn.textContent = d.getDate();
+            btn.dataset.iso = iso;
             btn.addEventListener('click', () => {
                 selectedIso = iso;
                 onSelect(iso);
@@ -2568,7 +2695,61 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         }
     }
     function onKey(e) {
-        if (e.key === 'Escape') close();
+        if (e.key === 'Escape') { close(); return; }
+
+        // Parse cursor date
+        const cm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(cursorIso);
+        if (!cm) return;
+        const cd = new Date(parseInt(cm[1], 10), parseInt(cm[2], 10) - 1, parseInt(cm[3], 10));
+        let newDate = new Date(cd);
+        let handled = true;
+
+        switch (e.key) {
+            case 'ArrowLeft':  newDate.setDate(cd.getDate() - 1); break;
+            case 'ArrowRight': newDate.setDate(cd.getDate() + 1); break;
+            case 'ArrowUp':    newDate.setDate(cd.getDate() - 7); break;
+            case 'ArrowDown':  newDate.setDate(cd.getDate() + 7); break;
+            case 'Enter':
+            case ' ':
+                e.preventDefault();
+                selectedIso = cursorIso;
+                onSelect(cursorIso);
+                close();
+                return;
+            case 'PageUp':
+                e.preventDefault();
+                newDate = new Date(viewYear, viewMonth - 1, 1);
+                break;
+            case 'PageDown':
+                e.preventDefault();
+                newDate = new Date(viewYear, viewMonth + 1, 1);
+                break;
+            case 'Home':
+                e.preventDefault();
+                // First day of the current view month
+                newDate = new Date(viewYear, viewMonth, 1);
+                break;
+            case 'End':
+                e.preventDefault();
+                // Last day of the current view month
+                newDate = new Date(viewYear, viewMonth + 1, 0);
+                break;
+            default:
+                handled = false;
+        }
+
+        if (!handled) return;
+        e.preventDefault();
+
+        // Update cursor to the new date
+        cursorIso = `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, '0')}-${String(newDate.getDate()).padStart(2, '0')}`;
+
+        // If the cursor moved to a different month, switch the view
+        if (newDate.getMonth() !== viewMonth || newDate.getFullYear() !== viewYear) {
+            viewYear = newDate.getFullYear();
+            viewMonth = newDate.getMonth();
+        }
+        render();
     }
     setTimeout(() => {
         document.addEventListener('mousedown', onDocClick);
@@ -2637,11 +2818,17 @@ function openCalendar(anchorEl, currentIso, onSelect) {
                 return el && el.value && el.value.trim();
             });
             if (hasExistingData) {
-                if (!confirm('This will replace the current form data with the demo report. Continue?')) {
-                    return;
-                }
+                confirmDialog({
+                    title: 'Replace current form data?',
+                    message: 'This will replace the current form data with the demo report. Continue?',
+                    confirmText: 'Replace'
+                }).then(ok => { if (ok) doFillDemoData(); });
+                return;
             }
+            doFillDemoData();
+        }
 
+        function doFillDemoData() {
             // -- Report date --
             document.getElementById('reportDate').isoValue = '2025-12-04';
 
@@ -2798,8 +2985,12 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             if (!tbody || !totalEl) return;
             let sum = 0;
             tbody.querySelectorAll('tr').forEach(tr => {
-                const s = tr.querySelector('.time-start').value;
-                const e = tr.querySelector('.time-end').value;
+                const startEl = tr.querySelector('.time-start');
+                const endEl = tr.querySelector('.time-end');
+                // Use canonical hhmmValue (matches updateDur logic) — falls back to .value
+                // for any future input that doesn't have the custom-time property.
+                const s = (startEl && startEl.hhmmValue !== undefined) ? startEl.hhmmValue : (startEl && startEl.value);
+                const e = (endEl && endEl.hhmmValue !== undefined) ? endEl.hhmmValue : (endEl && endEl.value);
                 const d = durationBetween(s, e);
                 if (d) sum += d.total;
             });
@@ -3464,6 +3655,19 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             signaturesSectionEl.setAttribute('data-print', 'on');
         }
 
+        // Download an arbitrary data object as a JSON file
+        function downloadJson(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || makeJsonFilename(data);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         // Save current form data to a JSON file
         document.getElementById('saveJsonBtn').addEventListener('click', () => {
             let data = collectFormData();
@@ -3485,15 +3689,7 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             });
             if (!hasData && lastSavedReport) data = { ...lastSavedReport };
             data.savedAt = new Date().toLocaleString();
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = makeJsonFilename(data);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            downloadJson(data);
         });
 
         // Load form data from a JSON file
@@ -3568,7 +3764,13 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             const delBtn = e.target.closest('.delete-btn');
             if (delBtn) {
                 const id = delBtn.dataset.id;
-                if (confirm('Delete this report?')) {
+                confirmDialog({
+                    title: 'Delete this report?',
+                    message: 'This permanently removes the report from this browser. This cannot be undone.',
+                    confirmText: 'Delete',
+                    danger: true
+                }).then(ok => {
+                    if (!ok) return;
                     const reports = getReports();
                     const idx = reports.findIndex(r => r.id === id);
                     if (idx !== -1) {
@@ -3577,7 +3779,7 @@ function openCalendar(anchorEl, currentIso, onSelect) {
                         loadReports();
                         showToast('Report deleted', 'warn');
                     }
-                }
+                });
                 return;
             }
             const cloneBtn = e.target.closest('.clone-btn');
@@ -3586,13 +3788,38 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             }
         });
 
+        // Export all saved reports as a single JSON backup file
+        document.getElementById('exportAllBtn').addEventListener('click', () => {
+            const reports = getReports();
+            if (!reports.length) {
+                showToast('No saved reports to export', 'warn');
+                return;
+            }
+            const backup = {
+                exportType: 'tightening-intervention-backup',
+                exportVersion: 1,
+                exportedAt: new Date().toISOString(),
+                count: reports.length,
+                reports: reports
+            };
+            const ts = new Date().toISOString().slice(0, 10);
+            downloadJson(backup, `intervention-reports-backup_${ts}.json`);
+            showToast(`✓ Exported ${reports.length} report${reports.length === 1 ? '' : 's'}`, 'success');
+        });
+
         // Clear all saved reports
         document.getElementById('clearAllBtn').addEventListener('click', () => {
-            if (confirm('Delete ALL saved reports? This cannot be undone.')) {
+            confirmDialog({
+                title: 'Delete ALL saved reports?',
+                message: 'This permanently removes every saved report from this browser. Consider using Export All first if you want to keep a copy. This cannot be undone.',
+                confirmText: 'Delete All',
+                danger: true
+            }).then(ok => {
+                if (!ok) return;
                 clearReports();
                 loadReports();
                 showToast('All reports deleted', 'warn');
-            }
+            });
         });
 
         // Initial setup: ensure the form has a unique ID, defaults, and the dropdown is populated
