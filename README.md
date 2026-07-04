@@ -27,7 +27,7 @@ A modern, installable web app for **Atlas Copco service technicians** to generat
 
 ### 📦 Reports & data
 - **Save Report** — persists to local storage with signatures + time tables + everything
-- **Save to JSON** — download a portable backup
+- **Save to JSON** — download a portable backup with a descriptive filename (`<customer>_<date>_<id>.json`)
 - **Load from JSON** — round-trip restore of every field
 - **Clone** — copy a saved report into a fresh form
 - **Delete** individual or all reports
@@ -80,7 +80,7 @@ Once installed it opens full-screen, runs offline, and behaves like a native app
 3. **Track time** — add rows for each work block and travel leg. Durations and totals are calculated automatically.
 4. **Save Report** — the entry appears in the *Saved Reports* list with full details, time tables, and signature thumbnails.
 5. **Print to PDF** — open the browser print dialog and choose *Save as PDF*. Hand the file to the customer.
-6. **Back up** — *Save to JSON* downloads a portable file. *Load from JSON* restores it on any device.
+6. **Back up** — *Save to JSON* downloads a portable file with a descriptive name like `stellantis-nv-aartselaar-plant_2025-12-04_VCXMFB.json` (customer name sanitized, ISO date, report ID). *Load from JSON* restores it on any device.
 7. **Fill Demo** — explore the app with one click (asks for confirmation before overwriting real data).
 
 ### Tips

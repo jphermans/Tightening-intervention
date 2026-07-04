@@ -1578,6 +1578,32 @@
             return `${dateStr} ${timeStr}`;
         }
 
+        // Build a filesystem-safe filename for a JSON export.
+        // Format: customer_date_uniqueID.json  e.g. "stellantis-nv_2025-12-04_VCXMFB.json"
+        function makeJsonFilename(data) {
+            // Sanitize a string for use in a filename: lowercase, dashes instead of spaces,
+            // strip anything that's not [a-z0-9-_]. Collapse repeated dashes. Trim dashes.
+            function safeName(raw, fallback) {
+                if (!raw || !String(raw).trim()) return fallback;
+                return String(raw)
+                    .toLowerCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents (é → e)
+                    .replace(/[^a-z0-9]+/g, '-')                       // non-alphanumerics → dash
+                    .replace(/-+/g, '-')                                // collapse repeated dashes
+                    .replace(/^-|-$/g, '')                              // trim leading/trailing dashes
+                    .slice(0, 60) || fallback;                          // cap length
+            }
+            const customer = safeName(data && data.customer, 'report');
+            // ISO date (sortable, locale-independent) — fall back to today if missing
+            const isoDate = (data && data.reportDate) || new Date().toISOString().slice(0, 10);
+            // Validate it looks like a date, else fall back
+            const datePart = /^\d{4}-\d{2}-\d{2}$/.test(isoDate)
+                ? isoDate
+                : new Date().toISOString().slice(0, 10);
+            const id = (data && data.id) || newId();
+            return `${customer}_${datePart}_${id}.json`;
+        }
+
         function loadReports() {
             const reports = getReports();
             // Backfill unique IDs for reports saved before the id field existed
@@ -2839,9 +2865,8 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            const stamp = new Date().toISOString().slice(0, 10);
             a.href = url;
-            a.download = `intervention-${stamp}.json`;
+            a.download = makeJsonFilename(data);
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
