@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <!-- Rounded square background in Atlas Copco teal -->
-  <rect width="512" height="512" rx="96" ry="96" fill="#006f8f"/>
+  <rect width="512" height="512" rx="96" ry="96" fill="#3BABCB"/>
   <!-- Subtle inner accent stripe at the bottom (yellow brand) -->
   <rect x="0" y="468" width="512" height="44" fill="#ffcd00"/>
   <!-- Wrench glyph centered -->
   <g transform="translate(256 232)" fill="#ffffff">
     <!-- Wrench head (left circle with notch) -->
     <circle cx="-78" cy="0" r="56" fill="#ffffff"/>
-    <circle cx="-78" cy="0" r="28" fill="#006f8f"/>
+    <circle cx="-78" cy="0" r="28" fill="#3BABCB"/>
     <!-- Wrench handle -->
     <rect x="-46" y="-16" width="180" height="32" rx="8" ry="8" fill="#ffffff"/>
     <!-- Wrench right tip (smaller gear) -->
     <circle cx="160" cy="0" r="42" fill="#ffffff"/>
-    <circle cx="160" cy="0" r="20" fill="#006f8f"/>
+    <circle cx="160" cy="0" r="20" fill="#3BABCB"/>
     <!-- Cogs on right tip -->
     <rect x="152" y="-52" width="16" height="14" fill="#ffffff"/>
     <rect x="152" y="38" width="16" height="14" fill="#ffffff"/>
