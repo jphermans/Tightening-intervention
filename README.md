@@ -107,7 +107,7 @@ Once installed it opens full-screen, runs offline, and behaves like a native app
 
 1. **Fill the report** — type or paste your data. Every label has a tooltip explaining what to enter.
 2. **Sign** — toggle the signature section, draw on both pads with your finger, mouse, or stylus.
-3. **Track time** — add rows for each work block and travel leg. Durations and totals are calculated automatically.
+3. **Track time** — add rows for each work block and travel trip (e.g. outbound to site, return to office). Durations and totals are calculated automatically.
 4. **Attach images** *(optional)* — toggle the *Add images / torque graphs* block to drop in photos, screenshots, or torque traces. Each image can carry a caption that prints under it on the PDF.
 5. **Save Report** — the entry appears in the *Saved Reports* list with full details, time tables, signature thumbnails, and attachment thumbnails.
 6. **Print to PDF** — open the browser print dialog and choose *Save as PDF*. The saved file gets the same descriptive name as the JSON export (e.g. `stellantis-nv-aartselaar-plant_2025-12-04_VCXMFB.pdf`) and shows the branded teal header with the AtlasCopco wordmark on the first page. Attached images appear between Notes and Work Time. Hand the file to the customer.

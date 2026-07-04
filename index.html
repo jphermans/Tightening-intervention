@@ -1707,7 +1707,7 @@
                 <table class="time-table">
                     <thead>
                         <tr>
-                            <th class="col-time-label" title="Which trip this is, e.g. 'Outbound to site', 'Return to office'.">Leg</th>
+                            <th class="col-time-label" title="Which trip this row covers, e.g. 'Outbound to site', 'Return to office'. Add one row per trip.">Trip</th>
                             <th class="col-time-start" title="When you departed, in 24-hour HH:MM.">Departure</th>
                             <th class="col-time-end" title="When you arrived at the destination, in 24-hour HH:MM.">Arrival</th>
                             <th class="col-time-dur" title="Automatically calculated from Departure and Arrival.">Time spent</th>
@@ -2206,8 +2206,13 @@
                     el.value = data[key];
                 }
             }
-            // Steps are dynamic — not in fieldMap
-            if (Array.isArray(data.steps)) {
+            // Steps are dynamic — not in fieldMap. Only populate when the loaded
+            // report is actually an Optimization report; for any other intervention
+            // type (Upgrade, Calibration, Other...) the steps section stays hidden
+            // and its contents are cleared so stale Psets don't leak back into the
+            // form after a JSON load.
+            const isOptimizationLoad = data.type === 'Tightening Program Optimization';
+            if (isOptimizationLoad && Array.isArray(data.steps)) {
                 fillSteps(data.steps);
             } else {
                 fillSteps([]);
