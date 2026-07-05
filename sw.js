@@ -1,8 +1,13 @@
 // Atlas Copco Intervention Report — Service Worker
-// Strategy: cache-first for app shell (so the app works fully offline once installed),
-// network-first with cache fallback for everything else.
+// Strategy:
+//   - HTML/navigation: stale-while-revalidate (instant load + background update)
+//   - Static assets (icons, manifest): cache-first (they rarely change)
+//   - Cross-origin: network-first with cache fallback
+// The HTML stale-while-revalidate strategy means users always see the cached
+// page instantly, AND get the latest version on their NEXT visit — without
+// needing a manual cache-version bump for every deploy.
 
-const CACHE_VERSION = 'ac-intervention-v12';
+const CACHE_VERSION = 'ac-intervention-v13';
 const APP_SHELL = [
   './',
   './index.html',
@@ -49,37 +54,64 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
 
-  // Cache-first for same-origin (the app shell — HTML, JS, CSS, icons)
-  if (url.origin === self.location.origin) {
+  // Cross-origin (e.g. CDN fonts) — network-first with cache fallback
+  if (url.origin !== self.location.origin) {
     event.respondWith(
-      caches.match(req).then((cached) => {
-        if (cached) return cached;
-        return fetch(req).then((response) => {
-          // Only cache successful, basic responses
-          if (response && response.status === 200 && response.type === 'basic') {
-            const clone = response.clone();
-            caches.open(CACHE_VERSION).then((cache) => cache.put(req, clone));
-          }
-          return response;
-        }).catch(() => {
-          // Offline + not in cache — fall back to index.html for navigation
-          if (req.mode === 'navigate') {
-            return caches.match('./index.html');
-          }
-        });
-      })
+      fetch(req).then((response) => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(req, clone));
+        }
+        return response;
+      }).catch(() => caches.match(req))
     );
     return;
   }
 
-  // Network-first for cross-origin (e.g. CDN fonts) with cache fallback
+  // Same-origin requests:
+  const isHTML = req.mode === 'navigate' ||
+    (req.headers.get('accept') || '').includes('text/html');
+
+  // HTML/navigation: stale-while-revalidate
+  // Serve cached immediately (instant load), fetch fresh in the background.
+  // The fresh copy is cached so the NEXT navigation shows the update —
+  // no manual cache-version bump needed for every deploy.
+  if (isHTML) {
+    event.respondWith(
+      caches.open(CACHE_VERSION).then((cache) =>
+        cache.match(req).then((cached) => {
+          // Fetch fresh in the background regardless
+          const fetchPromise = fetch(req).then((response) => {
+            if (response && response.status === 200) {
+              cache.put(req, response.clone());
+            }
+            return response;
+          }).catch(() => cached); // offline — fall back to whatever we have
+
+          // Return cached immediately if available, otherwise wait for network
+          return cached || fetchPromise;
+        })
+      )
+    );
+    return;
+  }
+
+  // Static assets (icons, manifest, CSS, etc.) — cache-first
   event.respondWith(
-    fetch(req).then((response) => {
-      if (response && response.status === 200) {
-        const clone = response.clone();
-        caches.open(CACHE_VERSION).then((cache) => cache.put(req, clone));
-      }
-      return response;
-    }).catch(() => caches.match(req))
+    caches.match(req).then((cached) => {
+      if (cached) return cached;
+      return fetch(req).then((response) => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const clone = response.clone();
+          caches.open(CACHE_VERSION).then((cache) => cache.put(req, clone));
+        }
+        return response;
+      }).catch(() => {
+        // Offline fallback for navigation requests
+        if (req.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
+    })
   );
 });

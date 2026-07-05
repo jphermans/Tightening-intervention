@@ -1,6 +1,6 @@
 # Atlas Copco Intervention Report
 
-A modern, installable web app for **Atlas Copco service technicians** to generate, sign, and print tightening intervention reports on any device — phone, tablet, or desktop. Works fully offline once installed.
+A modern, installable web app for **Atlas Copco service technicians** to generate, sign, and print intervention reports on any device — phone, tablet, or desktop. Works fully offline once installed.
 
 ![Form screenshot](docs/screenshot-form.png)
 

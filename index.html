@@ -1684,7 +1684,7 @@
             <div class="grid">
                 <div class="field full">
                     <label for="customerName" title="Company or organization name, e.g. 'Stellantis NV' or 'Atlas Copco Service Center'.">Customer Name</label>
-                    <input type="text" id="customerName" required>
+                    <input type="text" id="customerName" maxlength="40" required>
                 </div>
                 <div class="field">
                     <label for="customerContact" title="On-site contact person who can answer questions about the equipment and signs the report.">Contact Name</label>
@@ -1724,7 +1724,7 @@
             <div class="grid">
                 <div class="field">
                     <label for="controller" title="Controller model, e.g. 'Power Focus 6000', 'PF4000', or 'Power MACS 4000'.">Controller</label>
-                    <input type="text" id="controller">
+                    <input type="text" id="controller" maxlength="32">
                 </div>
                 <div class="field">
                     <label for="controllerSerial" title="Serial number printed on the controller's label — required for traceability and warranty claims.">Controller Serial</label>
@@ -1858,7 +1858,7 @@
                 <div class="signatures-grid">
                     <div class="signature-block">
                         <label title="The customer's on-site representative signs here to confirm the intervention was carried out as described.">Customer signature</label>
-                        <canvas id="customerSig" class="empty" width="600" height="200" title="Sign with mouse, finger, or stylus. The dotted line shows where to sign."></canvas>
+                        <canvas id="customerSig" class="empty" width="600" height="200" title="Sign with mouse, finger, or stylus. The dotted line shows where to sign." role="img" aria-label="Customer signature pad. Draw your signature here."></canvas>
                         <img id="customerSigImg" class="sig-print-img" alt="">
                         <div class="signature-footer">
                             <span class="sig-name" id="customerNameSig" title="Auto-filled from the Contact Name above.">—</span>
@@ -1868,7 +1868,7 @@
                     </div>
                     <div class="signature-block">
                         <label title="You (the technician) sign here to certify the work.">Technician signature</label>
-                        <canvas id="technicianSig" class="empty" width="600" height="200" title="Sign with mouse, finger, or stylus. The dotted line shows where to sign."></canvas>
+                        <canvas id="technicianSig" class="empty" width="600" height="200" title="Sign with mouse, finger, or stylus. The dotted line shows where to sign." role="img" aria-label="Technician signature pad. Draw your signature here."></canvas>
                         <img id="technicianSigImg" class="sig-print-img" alt="">
                         <div class="signature-footer">
                             <span class="sig-name" id="technicianNameSig" title="Auto-filled from the Technician Name above.">—</span>
@@ -1930,6 +1930,11 @@
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         Export All
                     </button>
+                    <button type="button" class="secondary" id="importAllBtn" title="Restore reports from a previously exported backup file. New reports are merged in; existing reports with the same ID are skipped.">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Import All
+                    </button>
+                    <input type="file" id="importAllFileInput" accept="application/json,.json" hidden>
                     <button type="button" class="secondary danger" id="clearAllBtn" title="Permanently delete every saved report. Asks for confirmation.">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         Clear All
@@ -2039,17 +2044,40 @@
                 requestAnimationFrame(() => overlay.classList.add('show'));
 
                 let resolved = false;
+                const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+                let lastFocused = document.activeElement;
+
                 function done(result) {
                     if (resolved) return;
                     resolved = true;
                     overlay.classList.remove('show');
-                    setTimeout(() => overlay.remove(), 180);
+                    setTimeout(() => {
+                        overlay.remove();
+                        // Restore focus to the element that opened the modal
+                        if (lastFocused && typeof lastFocused.focus === 'function') {
+                            lastFocused.focus();
+                        }
+                    }, 180);
                     document.removeEventListener('keydown', onKey);
                     resolve(result);
                 }
                 function onKey(e) {
-                    if (e.key === 'Escape') done(false);
-                    if (e.key === 'Enter') done(true);
+                    if (e.key === 'Escape') { e.preventDefault(); done(false); }
+                    if (e.key === 'Enter') { e.preventDefault(); done(true); }
+                    // Focus trap: Tab cycles within the modal
+                    if (e.key === 'Tab') {
+                        const focusable = Array.from(overlay.querySelectorAll(focusableSelector));
+                        if (!focusable.length) return;
+                        const first = focusable[0];
+                        const last = focusable[focusable.length - 1];
+                        if (e.shiftKey && document.activeElement === first) {
+                            e.preventDefault();
+                            last.focus();
+                        } else if (!e.shiftKey && document.activeElement === last) {
+                            e.preventDefault();
+                            first.focus();
+                        }
+                    }
                 }
                 overlay.querySelector('.modal-cancel').addEventListener('click', () => done(false));
                 overlay.querySelector('.modal-confirm').addEventListener('click', () => done(true));
@@ -2671,6 +2699,9 @@ function openCalendar(anchorEl, currentIso, onSelect) {
     const popup = document.createElement('div');
     popup.id = 'active-cal-popup';
     popup.className = 'cal-popup';
+    popup.setAttribute('role', 'dialog');
+    popup.setAttribute('aria-modal', 'false');
+    popup.setAttribute('aria-label', 'Date picker');
     popup.innerHTML = `
         <div class="cal-header">
             <button type="button" class="cal-nav-btn cal-prev" aria-label="Previous month">‹</button>
@@ -2884,8 +2915,8 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         }
 
         function doFillDemoData() {
-            // -- Report date --
-            document.getElementById('reportDate').isoValue = '2025-12-04';
+            // -- Report date -- (today, so the demo always looks current)
+            document.getElementById('reportDate').isoValue = todayIso();
 
             // -- Customer --
             document.getElementById('customerName').value = 'Stellantis NV — Aartselaar Plant';
@@ -3022,6 +3053,10 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             // Duration recomputes when the custom input commits a valid value
             startEl.addEventListener('timechange', updateDur);
             endEl.addEventListener('timechange', updateDur);
+            // Also recompute the total on every keystroke so the running sum
+            // stays in sync with what's visible, even before the input commits.
+            startEl.addEventListener('input', () => recomputeTotal(tbodyId, totalId));
+            endEl.addEventListener('input', () => recomputeTotal(tbodyId, totalId));
 
             // Restore values from saved data (sets hhmmValue and updates display)
             startEl.hhmmValue = data.start || '';
@@ -3534,11 +3569,7 @@ function openCalendar(anchorEl, currentIso, onSelect) {
                     if (reportIso && /^\d{4}-\d{2}-\d{2}$/.test(reportIso)) {
                         dateLabel = formatDateDDMMYYYY(reportIso);
                     } else {
-                        // Fallback: today in DD/MM/YYYY via the existing helper
-                        const today = new Date();
-                        const tzOffset = today.getTimezoneOffset() * 60000;
-                        const isoToday = new Date(today.getTime() - tzOffset).toISOString().slice(0, 10);
-                        dateLabel = formatDateDDMMYYYY(isoToday);
+                        dateLabel = formatDateDDMMYYYY(todayIso());
                     }
                     dateSpan.textContent = dateLabel;
                 }
@@ -3695,10 +3726,7 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             if (reportIso && /^\d{4}-\d{2}-\d{2}$/.test(reportIso)) {
                 dateLabel = formatDateDDMMYYYY(reportIso);
             } else {
-                const today = new Date();
-                const tzOffset = today.getTimezoneOffset() * 60000;
-                const isoToday = new Date(today.getTime() - tzOffset).toISOString().slice(0, 10);
-                dateLabel = formatDateDDMMYYYY(isoToday);
+                dateLabel = formatDateDDMMYYYY(todayIso());
             }
             const customerDateEl = document.getElementById('customerSigDate');
             const technicianDateEl = document.getElementById('technicianSigDate');
@@ -3863,6 +3891,61 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             showToast(`✓ Exported ${reports.length} report${reports.length === 1 ? '' : 's'}`, 'success');
         });
 
+        // Import all reports from a backup file (counterpart to Export All)
+        const importAllFileInput = document.getElementById('importAllFileInput');
+        document.getElementById('importAllBtn').addEventListener('click', () => {
+            importAllFileInput.value = '';
+            importAllFileInput.click();
+        });
+        importAllFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    // Accept both backup format ({reports: [...]}) and plain arrays
+                    const incoming = Array.isArray(data) ? data : (data.reports || []);
+                    if (!Array.isArray(incoming) || !incoming.length) {
+                        showToast('No reports found in backup file', 'error');
+                        return;
+                    }
+                    const existing = getReports();
+                    const existingIds = new Set(existing.map(r => r && r.id).filter(Boolean));
+                    let added = 0, skipped = 0;
+                    incoming.forEach(r => {
+                        if (!r || typeof r !== 'object') return;
+                        // Assign a new ID if missing or duplicate, so import never fails
+                        if (!r.id || existingIds.has(r.id)) {
+                            r.id = newId();
+                            existingIds.add(r.id);
+                        }
+                        existing.push(r);
+                        added++;
+                    });
+                    // Deduplicate by ID (in case the backup had internal dupes)
+                    const seen = new Set();
+                    const deduped = existing.filter(r => {
+                        if (seen.has(r.id)) { skipped++; return false; }
+                        seen.add(r.id);
+                        return true;
+                    });
+                    const saved = saveReports(deduped);
+                    if (!saved) {
+                        showToast('⚠ Storage full — not all reports could be imported', 'error');
+                        return;
+                    }
+                    loadReports();
+                    showToast(`✓ Imported ${added} report${added === 1 ? '' : 's'}${skipped ? ` (${skipped} duplicate${skipped === 1 ? '' : 's'} skipped)` : ''}`, 'success');
+                } catch (err) {
+                    showToast('Invalid backup file: ' + err.message, 'error');
+                }
+            };
+            reader.onerror = () => showToast('Failed to read backup file', 'error');
+            reader.readAsText(file);
+            importAllFileInput.value = '';
+        });
+
         // Clear all saved reports
         document.getElementById('clearAllBtn').addEventListener('click', () => {
             confirmDialog({
@@ -3877,6 +3960,33 @@ function openCalendar(anchorEl, currentIso, onSelect) {
                 showToast('All reports deleted', 'warn');
             });
         });
+
+        // ===== Warn before closing/leaving with unsaved form data =====
+        // Tracks whether the user has entered anything since the last save/clear.
+        // When dirty, the browser shows its native "Leave site?" confirmation.
+        let formDirty = false;
+        function markFormDirty() { formDirty = true; }
+        function markFormClean() { formDirty = false; }
+
+        // Any user input in the form marks it dirty
+        form.addEventListener('input', markFormDirty);
+        // Signature drawing marks it dirty
+        ['customerSig', 'technicianSig'].forEach(id => {
+            const c = document.getElementById(id);
+            if (c) c.addEventListener('pointerdown', markFormDirty);
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (formDirty) {
+                e.preventDefault();
+                e.returnValue = ''; // Chrome requires this
+            }
+        });
+
+        // Reset dirty flag after successful save, clear, clone, or JSON load
+        // (hook into existing handlers via form events)
+        form.addEventListener('submit', () => setTimeout(markFormClean, 100));
+        form.addEventListener('reset', () => setTimeout(markFormClean, 100));
 
         // Initial setup: ensure the form has a unique ID, defaults, and the dropdown is populated
         function todayIso() {
