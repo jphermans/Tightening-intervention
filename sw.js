@@ -1,8 +1,8 @@
-// Atlas Copco Tightening Intervention — Service Worker
+// Atlas Copco Intervention Report — Service Worker
 // Strategy: cache-first for app shell (so the app works fully offline once installed),
 // network-first with cache fallback for everything else.
 
-const CACHE_VERSION = 'ac-intervention-v8';
+const CACHE_VERSION = 'ac-intervention-v9';
 const APP_SHELL = [
   './',
   './index.html',

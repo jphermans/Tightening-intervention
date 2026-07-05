@@ -1,5 +1,5 @@
 {
-  "name": "Atlas Copco Tightening Intervention",
+  "name": "Atlas Copco Intervention Report",
   "short_name": "Intervention",
   "description": "Generate, sign, and print Atlas Copco tightening intervention service reports. Works fully offline once installed.",
   "start_url": "./index.html",
