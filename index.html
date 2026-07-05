@@ -136,6 +136,44 @@
             border-color: var(--ac-yellow);
             border-style: solid;
         }
+
+        /* ===== Help system ===== */
+        /* When .form-help-on is on the <form>, every label[title] gets a
+           help-text block injected after it via JS. This class is the on/off
+           switch; the individual .field-help blocks are always in the DOM but
+           hidden unless the parent form has this class. */
+        .field-help {
+            display: none;
+            font-size: 0.82rem;
+            color: var(--ac-grey);
+            background: var(--ac-tint);
+            border-left: 3px solid var(--ac-primary-light);
+            padding: 6px 10px;
+            margin: -4px 0 8px;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.45;
+        }
+        /* When help mode is on, show all help blocks */
+        form.form-help-on .field-help { display: block; }
+        /* Help toggle button — brand-accent outline */
+        button.help-btn {
+            background: transparent;
+            color: var(--ac-primary);
+            border: 1px dashed var(--ac-primary-light);
+        }
+        button.help-btn:hover {
+            background: var(--ac-tint);
+            border-color: var(--ac-primary);
+            border-style: solid;
+        }
+        button.help-btn.active {
+            background: var(--ac-tint);
+            border-color: var(--ac-primary);
+            border-style: solid;
+            color: var(--ac-primary-dark);
+        }
+        /* Hide help blocks in print */
+        @media print { .field-help { display: none !important; } }
         .inline-group { display: flex; gap: 8px; align-items: stretch; }
         .inline-group select { flex: 1; }
         .inline-group button { white-space: nowrap; }
@@ -1868,6 +1906,10 @@
                 <button type="button" class="secondary demo-btn" id="fillDemoBtn" title="Fill the form with a complete sample report (Stellantis NV, Aartselaar). Use this to explore the app — you'll be asked before any existing data is overwritten.">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 2h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l-1-2z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
                     Fill Demo
+                </button>
+                <button type="button" class="secondary help-btn" id="helpToggleBtn" title="Show or hide help text under every field.">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Help
                 </button>
                 <input type="file" id="jsonFileInput" accept="application/json,.json" aria-hidden="true">
             </div>
@@ -3868,6 +3910,38 @@ function openCalendar(anchorEl, currentIso, onSelect) {
                 toggleReportsSection();
             }
         });
+
+        // ===== Help system: inject help text from title attributes =====
+        // On page load, every <label> that has a title attribute gets a
+        // .field-help block inserted right after it, populated with the title
+        // text. These blocks are hidden by default and toggled on/off by the
+        // Help button. This avoids N separate help buttons and works on mobile.
+        (function setupHelpSystem() {
+            const labels = form.querySelectorAll('label[title]');
+            labels.forEach(label => {
+                const helpText = label.getAttribute('title');
+                if (!helpText) return;
+                const helpDiv = document.createElement('div');
+                helpDiv.className = 'field-help';
+                helpDiv.textContent = helpText;
+                // Insert right after the label — pushes the input down a bit
+                // when visible, giving a clean inline help appearance.
+                label.insertAdjacentElement('afterend', helpDiv);
+            });
+
+            const helpBtn = document.getElementById('helpToggleBtn');
+            if (!helpBtn) return;
+            // Restore saved state
+            if (storage.get('helpVisible') === 'true') {
+                form.classList.add('form-help-on');
+                helpBtn.classList.add('active');
+            }
+            helpBtn.addEventListener('click', () => {
+                const isOn = form.classList.toggle('form-help-on');
+                helpBtn.classList.toggle('active', isOn);
+                storage.set('helpVisible', isOn ? 'true' : 'false');
+            });
+        })();
 
         // ===== PWA: register service worker for offline / installable use =====
         if ('serviceWorker' in navigator) {
