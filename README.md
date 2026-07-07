@@ -105,9 +105,13 @@ The database lives in `./data/` so the app and data travel together.
 
 ### Double-click launchers
 - **macOS:** `launch-macos.command`
+- **Linux:** `launch-linux.sh`
 - **Windows:** `launch-windows.bat` (calls `launch-windows.ps1`)
 
 Both launchers start the same local server/database path and are meant for USB-stick use.
+
+### Windows EXE build
+If you want a distributable `.exe`, run `build-windows-exe.ps1` on Windows with PyInstaller installed. It produces a frozen app folder with an `InterventionReport.exe` that serves the same local files and writes its database to `./data/intervention_reports.sqlite3` next to the EXE.
 
 ### Static fallback
 The repo still works as a static app on GitHub Pages or from `index.html`. When `/api/health` is not available, the frontend falls back to the original browser `localStorage` behavior.

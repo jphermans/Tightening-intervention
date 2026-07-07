@@ -19,8 +19,15 @@ from typing import Optional
 from uuid import uuid4
 
 
-ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / "data"
+def app_root() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+APP_ROOT = app_root()
+RESOURCE_ROOT = Path(getattr(sys, "_MEIPASS", APP_ROOT))
+DATA_DIR = APP_ROOT / "data"
 DEFAULT_DB = DATA_DIR / "intervention_reports.sqlite3"
 MAX_BODY_BYTES = 100 * 1024 * 1024
 
@@ -171,7 +178,7 @@ class Handler(SimpleHTTPRequestHandler):
     server_version = "InterventionServer/1.0"
 
     def __init__(self, *args, directory: Optional[str] = None, **kwargs):
-        super().__init__(*args, directory=str(ROOT), **kwargs)
+        super().__init__(*args, directory=str(RESOURCE_ROOT), **kwargs)
 
     @property
     def store(self) -> ReportStore:
@@ -257,7 +264,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def translate_path(self, path: str) -> str:
         translated = super().translate_path(path)
-        root = str(ROOT.resolve())
+        root = str(RESOURCE_ROOT.resolve())
         resolved = str(Path(translated).resolve())
         if not resolved.startswith(root):
             return root
@@ -312,7 +319,7 @@ def main() -> int:
     url = f"http://{args.host}:{args.port}/"
 
     print("Atlas Copco Intervention Report - Local Server")
-    print(f"Serving:  {ROOT}")
+    print(f"Serving:  {RESOURCE_ROOT}")
     print(f"Database: {store.db_path}")
     print(f"URL:      {url}")
     print("Stop:     Ctrl+C")

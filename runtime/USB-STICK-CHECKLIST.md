@@ -7,9 +7,11 @@ Use this checklist when you want to hand the app to someone on a stick.
 - `index.js`
 - `server.py`
 - `serve.sh`
+- `launch-linux.sh`
 - `launch-macos.command`
 - `launch-windows.bat`
 - `launch-windows.ps1`
+- `build-windows-exe.ps1`
 - `manifest.json`
 - `sw.js`
 - `icons/`

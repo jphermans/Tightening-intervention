@@ -31,6 +31,11 @@ data/
 intervention_reports.sqlite3
 intervention_reports.sqlite3-*
 
+# PyInstaller build outputs
+build/
+dist/
+*.spec
+
 # Optional bundled runtime for fully offline USB-stick use.
 # Keep the scaffold docs/markers tracked, but ignore actual interpreter files.
 runtime/*

@@ -23,6 +23,7 @@ From the project root:
 
 ```bash
 ./serve.sh
+./launch-linux.sh
 ```
 
 The app will start a local server on `127.0.0.1:8000` by default and store data in:
