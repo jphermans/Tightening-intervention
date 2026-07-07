@@ -9,6 +9,7 @@ this layout when you copy a runtime onto a USB stick.
 ```text
 runtime/
 ├── README.md
+├── START-HERE.md
 └── python/
     ├── .gitkeep
     └── bin/
@@ -30,8 +31,8 @@ runtime/
   3. `INTERVENTION_PYTHON`
   4. system Python
 - `launch-windows.ps1` checks:
-  1. `runtime\python\python.exe`
-  2. `runtime\python\bin\python.exe`
+  1. `runtime\\python\\python.exe`
+  2. `runtime\\python\\bin\\python.exe`
   3. `INTERVENTION_PYTHON`
   4. `python3`, `python`, `py -3`
 
@@ -40,5 +41,4 @@ runtime/
 - Keep the runtime local to the stick; do not commit the interpreter files.
 - The database lives in `./data/intervention_reports.sqlite3`.
 - If you bundle a runtime, test both macOS and Windows launchers once on the target OS.
-- See `LAUNCH-NOTES.txt` for a quick user-facing start guide.
-- See `USB-STICK-CHECKLIST.md` for the packaging checklist.
+- The single polished entry point is `START-HERE.md`.
