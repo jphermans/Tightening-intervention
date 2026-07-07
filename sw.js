@@ -7,7 +7,7 @@
 // page instantly, AND get the latest version on their NEXT visit — without
 // needing a manual cache-version bump for every deploy.
 
-const CACHE_VERSION = 'ac-intervention-v15';
+const CACHE_VERSION = 'ac-intervention-v16';
 const APP_SHELL = [
   './',
   './index.html',
@@ -77,26 +77,17 @@ self.addEventListener('fetch', (event) => {
   const isHTML = req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html');
 
-  // HTML/navigation: stale-while-revalidate
-  // Serve cached immediately (instant load), fetch fresh in the background.
-  // The fresh copy is cached so the NEXT navigation shows the update —
-  // no manual cache-version bump needed for every deploy.
+  // HTML/navigation: network-first with cache fallback.
+  // When online, always prefer the fresh page so visual updates (like theme or
+  // header color changes) appear immediately. Offline still falls back to cache.
   if (isHTML) {
     event.respondWith(
-      caches.open(CACHE_VERSION).then((cache) =>
-        cache.match(req).then((cached) => {
-          // Fetch fresh in the background regardless
-          const fetchPromise = fetch(req).then((response) => {
-            if (response && response.status === 200) {
-              cache.put(req, response.clone());
-            }
-            return response;
-          }).catch(() => cached); // offline — fall back to whatever we have
-
-          // Return cached immediately if available, otherwise wait for network
-          return cached || fetchPromise;
-        })
-      )
+      fetch(req).then((response) => {
+        if (response && response.status === 200) {
+          caches.open(CACHE_VERSION).then((cache) => cache.put(req, response.clone()));
+        }
+        return response;
+      }).catch(() => caches.open(CACHE_VERSION).then((cache) => cache.match(req)).then((cached) => cached || caches.match('./index.html')))
     );
     return;
   }

@@ -49,12 +49,18 @@
             margin: 0;
             line-height: 1.6;
             color: var(--ac-charcoal);
-            background: #f5f2ef;
+            background: linear-gradient(180deg, #b9ddeb 0%, #d5edf7 32%, #eef8fc 100%);
+            background-attachment: fixed;
         }
         body[data-theme="dark"] {
             color: #e8eef2;
             background: #0f1418;
             color-scheme: dark;
+        }
+        header {
+            background: linear-gradient(180deg, var(--ac-primary) 0%, var(--ac-primary-dark) 100%);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
         body[data-theme="dark"] header {
             box-shadow: 0 2px 8px rgba(0,0,0,0.45);
@@ -812,6 +818,39 @@
         .update-banner .update-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .update-banner button { white-space: nowrap; }
         .update-banner[hidden] { display: none !important; }
+
+        .lock-banner {
+            margin: 14px 0 0;
+            padding: 12px 14px;
+            border: 1px solid #c9d8df;
+            border-left-width: 4px;
+            border-radius: 8px;
+            background: #f6fbfd;
+            color: var(--ac-charcoal);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .lock-banner strong { color: var(--ac-primary-dark); }
+        .lock-banner .lock-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .lock-banner button { white-space: nowrap; }
+        .lock-banner[hidden] { display: none !important; }
+        body.app-locked form,
+        body.app-locked .reports-section {
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 2px rgba(0,146,188,0.08);
+        }
+        body.app-locked .report-item .report-actions button,
+        body.app-locked .reports-toolbar button:not(#exportAllBtn),
+        body.app-locked #cloneSource,
+        body.app-locked #cloneFromSelectBtn,
+        body.app-locked #interventionForm input,
+        body.app-locked #interventionForm select,
+        body.app-locked #interventionForm textarea,
+        body.app-locked #interventionForm button:not(#printBtn):not(#themeToggleBtn):not(#helpToggleBtn):not(#updateInfoBtn):not(#updateDismissBtn):not(#lockToggleBtn):not(#lockPinBtn):not(#exportAllBtn) {
+            cursor: not-allowed;
+        }
 
         .reports-section.is-empty .reports-toolbar #clearAllBtn,
         .reports-section.is-empty .reports-toolbar #exportAllBtn { display: none; }
@@ -1816,6 +1855,16 @@
                 <button type="button" class="secondary" id="updateDismissBtn">Dismiss</button>
             </div>
         </div>
+        <div id="lockBanner" class="lock-banner" hidden>
+            <div>
+                <strong id="lockBannerTitle">Unattended lock.</strong>
+                <span id="lockBannerText"></span>
+            </div>
+            <div class="lock-actions">
+                <button type="button" class="secondary" id="lockToggleBtn"></button>
+                <button type="button" class="secondary" id="lockPinBtn"></button>
+            </div>
+        </div>
         <form id="interventionForm">
             <div class="section-title">Report</div>
             <div class="grid">
@@ -2122,6 +2171,11 @@
         const reportList = document.getElementById('reportList');
         const reportIdEl = document.getElementById('reportId');
         const cloneSourceEl = document.getElementById('cloneSource');
+        const lockBanner = document.getElementById('lockBanner');
+        const lockBannerTitle = document.getElementById('lockBannerTitle');
+        const lockBannerText = document.getElementById('lockBannerText');
+        const lockToggleBtn = document.getElementById('lockToggleBtn');
+        const lockPinBtn = document.getElementById('lockPinBtn');
         const submitBtn = form.querySelector('button[type="submit"]');
         let lastSavedReport = null;
         let activeEditReportId = '';
@@ -2179,6 +2233,7 @@
         }
 
         async function openReportForEdit(id, { clone = false } = {}) {
+            if (!(await ensureUnlocked(clone ? 'clone a saved report' : 'open a saved report'))) return false;
             const report = getReports().find(r => r && r.id === id);
             if (!report) return false;
             fillForm(report);
@@ -2219,6 +2274,217 @@
                 catch (_) { /* no-op */ }
             }
         };
+        const LOCK_CONFIG_KEY = 'unattendedLockConfig';
+        const LOCK_SESSION_KEY = 'unattendedLockUnlocked';
+        const LOCKED_BUTTON_IDS = new Set([
+            'printBtn',
+            'themeToggleBtn',
+            'helpToggleBtn',
+            'updateInfoBtn',
+            'updateDismissBtn',
+            'lockToggleBtn',
+            'lockPinBtn'
+        ]);
+        let lockConfig = readLockConfig();
+        let appLocked = !!lockConfig && !readLockSession();
+
+        function readLockConfig() {
+            try {
+                const raw = storage.get(LOCK_CONFIG_KEY, '');
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return null;
+                if (!parsed.salt || !parsed.pinHash) return null;
+                return { salt: String(parsed.salt), pinHash: String(parsed.pinHash) };
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function writeLockConfig(config) {
+            if (config && config.salt && config.pinHash) {
+                storage.set(LOCK_CONFIG_KEY, JSON.stringify({ salt: String(config.salt), pinHash: String(config.pinHash) }));
+            } else {
+                storage.remove(LOCK_CONFIG_KEY);
+            }
+        }
+
+        function readLockSession() {
+            try {
+                return sessionStorage.getItem(LOCK_SESSION_KEY) === 'true';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function writeLockSession(unlocked) {
+            try {
+                if (unlocked) sessionStorage.setItem(LOCK_SESSION_KEY, 'true');
+                else sessionStorage.removeItem(LOCK_SESSION_KEY);
+            } catch (_) {
+                /* no-op */
+            }
+        }
+
+        function hasPinConfigured() {
+            return !!(lockConfig && lockConfig.salt && lockConfig.pinHash);
+        }
+
+        function randomSalt() {
+            const bytes = new Uint8Array(16);
+            if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+                crypto.getRandomValues(bytes);
+            } else {
+                for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+            }
+            return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function hashPin(pin, salt) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(`${salt}:${pin}`);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function pinDialog(message, defaultValue = '') {
+            const pin = window.prompt(message, defaultValue);
+            if (pin === null) return null;
+            return String(pin).trim();
+        }
+
+        function refreshLockUi() {
+            const pinned = hasPinConfigured();
+            const bannerVisible = pinned || appLocked;
+            if (lockBanner) lockBanner.hidden = !bannerVisible;
+            if (lockBannerTitle) {
+                lockBannerTitle.textContent = appLocked ? 'App locked.' : (pinned ? 'App unlocked.' : 'No PIN set yet.');
+            }
+            if (lockBannerText) {
+                lockBannerText.textContent = appLocked
+                    ? 'Enter the PIN to change, save, import, or delete reports.'
+                    : (pinned
+                        ? 'This browser session is unlocked. Lock it again before you step away.'
+                        : 'Set a PIN so the app becomes read-only when unattended.');
+            }
+            if (lockToggleBtn) {
+                lockToggleBtn.textContent = pinned
+                    ? (appLocked ? 'Unlock' : 'Lock')
+                    : 'Set PIN & Lock';
+                lockToggleBtn.title = pinned
+                    ? (appLocked ? 'Unlock editing with the PIN.' : 'Lock editing again.')
+                    : 'Create a PIN, then lock the app.';
+            }
+            if (lockPinBtn) {
+                lockPinBtn.hidden = appLocked;
+                lockPinBtn.textContent = pinned ? 'Change PIN' : 'Set PIN';
+                lockPinBtn.title = pinned
+                    ? 'Change the unattended-use PIN.'
+                    : 'Create a PIN for unattended-use lock.';
+            }
+
+            form.querySelectorAll('input, select, textarea, button').forEach(el => {
+                if (LOCKED_BUTTON_IDS.has(el.id)) {
+                    el.disabled = false;
+                    return;
+                }
+                el.disabled = appLocked;
+            });
+            if (reportList) {
+                reportList.querySelectorAll('button').forEach(btn => {
+                    btn.disabled = appLocked;
+                });
+            }
+            if (cloneSourceEl) cloneSourceEl.disabled = appLocked || !getReports().length;
+        }
+
+        function setLockState(locked, { persistSession = true } = {}) {
+            appLocked = !!locked;
+            document.body.classList.toggle('app-locked', appLocked);
+            if (persistSession) writeLockSession(!appLocked);
+            refreshLockUi();
+        }
+
+        async function unlockWithPin() {
+            if (!hasPinConfigured()) return false;
+            const pin = await pinDialog('Enter the unattended-use PIN to unlock editing:');
+            if (pin === null) return false;
+            const digest = await hashPin(pin, lockConfig.salt);
+            if (digest !== lockConfig.pinHash) {
+                showToast('Incorrect PIN', 'error');
+                return false;
+            }
+            writeLockSession(true);
+            setLockState(false, { persistSession: false });
+            showToast('✓ Editing unlocked for this browser session', 'success');
+            return true;
+        }
+
+        async function setOrChangePin() {
+            if (appLocked) {
+                showToast('Unlock the app before changing the PIN', 'warn');
+                return false;
+            }
+            if (hasPinConfigured()) {
+                const current = await pinDialog('Enter the current PIN to change it:');
+                if (current === null) return false;
+                const currentDigest = await hashPin(current, lockConfig.salt);
+                if (currentDigest !== lockConfig.pinHash) {
+                    showToast('Incorrect current PIN', 'error');
+                    return false;
+                }
+            }
+            const first = await pinDialog('Enter a new PIN (4 or more digits):');
+            if (first === null) return false;
+            if (!/^\d{4,}$/.test(first)) {
+                showToast('Use at least 4 digits for the PIN', 'warn');
+                return false;
+            }
+            const second = await pinDialog('Re-enter the new PIN to confirm:');
+            if (second === null) return false;
+            if (first !== second) {
+                showToast('PIN entries did not match', 'error');
+                return false;
+            }
+            const hadPin = hasPinConfigured();
+            const salt = randomSalt();
+            lockConfig = { salt, pinHash: await hashPin(first, salt) };
+            writeLockConfig(lockConfig);
+            writeLockSession(true);
+            showToast(hadPin ? '✓ PIN updated' : '✓ PIN saved', 'success');
+            refreshLockUi();
+            return true;
+        }
+
+        async function setInitialPinAndLock() {
+            const ok = await setOrChangePin();
+            if (!ok) return false;
+            setLockState(true);
+            showToast('✓ App locked for unattended use', 'success');
+            return true;
+        }
+
+        async function toggleLock() {
+            if (!hasPinConfigured()) {
+                await setInitialPinAndLock();
+                return;
+            }
+            if (appLocked) {
+                await unlockWithPin();
+            } else {
+                setLockState(true);
+                showToast('✓ App locked', 'success');
+            }
+        }
+
+        async function ensureUnlocked(actionText) {
+            if (!appLocked) return true;
+            const unlocked = await unlockWithPin();
+            if (!unlocked) {
+                showToast(`Locked — enter the PIN to ${actionText}.`, 'warn');
+            }
+            return unlocked;
+        }
 
         const THEME_KEY = 'uiTheme';
         function applyTheme(theme) {
@@ -2610,6 +2876,7 @@
             updateReportsHeader(reports.length);
             if (!reports.length) {
                 reportList.innerHTML = '<p class="reports-empty-msg">No saved reports yet. Import a backup file or save a report from the form above.</p>';
+                refreshLockUi();
                 return;
             }
             reportList.innerHTML = reports.map((r) => `
@@ -2656,6 +2923,7 @@
                     ${renderCardAttachments(r)}
                 </div>
             `).join('');
+            refreshLockUi();
         }
 
         // Collapsible Saved Reports header — keeps the form view tidy when
@@ -2702,13 +2970,14 @@
                 }).join('');
         }
 
-        function cloneReportById(id) {
+        async function cloneReportById(id) {
             if (!id) return;
-            void openReportForEdit(id, { clone: true });
+            await openReportForEdit(id, { clone: true });
         }
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!(await ensureUnlocked('save this report'))) return;
             const newReport = collectFormData();
             // Use whatever ID is currently shown in the form (auto-managed)
             newReport.id = reportIdEl.value || newId();
@@ -3471,7 +3740,10 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             form.classList.add('flash');
         }
 
-        document.getElementById('fillDemoBtn').addEventListener('click', fillDemoData);
+        document.getElementById('fillDemoBtn').addEventListener('click', async () => {
+            if (!(await ensureUnlocked('load demo data'))) return;
+            fillDemoData();
+        });
 
         function addTimeRow(tbodyId, data) {
             data = data || {};
@@ -4224,7 +4496,8 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         }
 
         // Save current form data to a JSON file
-        document.getElementById('saveJsonBtn').addEventListener('click', () => {
+        document.getElementById('saveJsonBtn').addEventListener('click', async () => {
+            if (!(await ensureUnlocked('save JSON from the current form'))) return;
             let data = collectFormData();
             // Attach dynamic steps table (not in fieldMap)
             data.steps = collectSteps();
@@ -4249,12 +4522,17 @@ function openCalendar(anchorEl, currentIso, onSelect) {
 
         // Load form data from a JSON file
         const jsonFileInput = document.getElementById('jsonFileInput');
-        document.getElementById('loadJsonBtn').addEventListener('click', () => {
+        document.getElementById('loadJsonBtn').addEventListener('click', async () => {
+            if (!(await ensureUnlocked('load data from JSON'))) return;
             // Reset value first so picking the same file twice still fires 'change'
             jsonFileInput.value = '';
             jsonFileInput.click();
         });
-        jsonFileInput.addEventListener('change', (e) => {
+        jsonFileInput.addEventListener('change', async (e) => {
+            if (!(await ensureUnlocked('restore a report from JSON'))) {
+                jsonFileInput.value = '';
+                return;
+            }
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -4321,6 +4599,17 @@ function openCalendar(anchorEl, currentIso, onSelect) {
 
         // Delete a single saved report / clone a report into the form
         reportList.addEventListener('click', async (e) => {
+            if (appLocked) {
+                const actionBtn = e.target.closest('.open-btn, .delete-btn, .clone-btn');
+                if (actionBtn) {
+                    const permitted = actionBtn.classList.contains('open-btn')
+                        ? await ensureUnlocked('open a saved report')
+                        : actionBtn.classList.contains('clone-btn')
+                            ? await ensureUnlocked('clone a saved report')
+                            : await ensureUnlocked('delete a saved report');
+                    if (!permitted) return;
+                }
+            }
             const openBtn = e.target.closest('.open-btn');
             if (openBtn) {
                 const ok = await openReportForEdit(openBtn.dataset.id, { clone: false });
@@ -4377,11 +4666,16 @@ function openCalendar(anchorEl, currentIso, onSelect) {
 
         // Import all reports from a backup file (counterpart to Export All)
         const importAllFileInput = document.getElementById('importAllFileInput');
-        document.getElementById('importAllBtn').addEventListener('click', () => {
+        document.getElementById('importAllBtn').addEventListener('click', async () => {
+            if (!(await ensureUnlocked('import reports from a backup file'))) return;
             importAllFileInput.value = '';
             importAllFileInput.click();
         });
-        importAllFileInput.addEventListener('change', (e) => {
+        importAllFileInput.addEventListener('change', async (e) => {
+            if (!(await ensureUnlocked('import reports from a backup file'))) {
+                importAllFileInput.value = '';
+                return;
+            }
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -4431,7 +4725,8 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         });
 
         // Clear all saved reports
-        document.getElementById('clearAllBtn').addEventListener('click', () => {
+        document.getElementById('clearAllBtn').addEventListener('click', async () => {
+            if (!(await ensureUnlocked('delete all saved reports'))) return;
             confirmDialog({
                 title: 'Delete ALL saved reports?',
                 message: 'This permanently removes every saved report from this browser. Consider using Export All first if you want to keep a copy. This cannot be undone.',
@@ -4486,6 +4781,7 @@ function openCalendar(anchorEl, currentIso, onSelect) {
         if (reportDateEl && !reportDateEl.isoValue) reportDateEl.isoValue = todayIso();
         setReportId();
         setSaveMode('new');
+        setLockState(appLocked, { persistSession: false });
         updateOptimizationVisibility();
         // Seed each time table with one empty row so the UI is obvious
         fillTimeRows('workTimeRows', []);
@@ -4504,6 +4800,10 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             }
             await checkForUpdates();
         })();
+
+        lockToggleBtn.addEventListener('click', toggleLock);
+        lockPinBtn.addEventListener('click', setOrChangePin);
+        refreshLockUi();
 
         // Click and keyboard handlers for the Saved Reports toggle header
         const reportsHeaderEl = document.getElementById('reportsHeader');
