@@ -106,7 +106,7 @@ The database lives in `./data/` so the app and data travel together.
 ### Double-click launchers
 - **macOS:** `launch-macos.command`
 - **Linux:** `launch-linux.sh` or `launch-linux.desktop`
-- **Windows:** `launch-windows.bat` (calls `launch-windows.ps1`)
+- **Windows:** `launch-windows.bat` (standalone; `launch-windows.cmd` is also provided)
 
 Both launchers start the same local server/database path and are meant for USB-stick use.
 

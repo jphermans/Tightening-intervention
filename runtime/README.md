@@ -26,15 +26,17 @@ runtime/
   3. `INTERVENTION_PYTHON`
   4. system Python
 - `launch-macos.command` checks:
-  1. `runtime/python/bin/python3`
-  2. `runtime/python/bin/python`
+  1. `runtime\\python\\bin\\python3`
+  2. `runtime\\python\\bin\\python`
   3. `INTERVENTION_PYTHON`
   4. system Python
-- `launch-windows.ps1` checks:
-  1. `runtime\\python\\python.exe`
-  2. `runtime\\python\\bin\\python.exe`
-  3. `INTERVENTION_PYTHON`
-  4. `python3`, `python`, `py -3`
+- `launch-windows.bat` checks:
+  1. `py -3`
+  2. `python3`
+  3. `python`
+  4. `runtime\\python\\python.exe`
+  5. `runtime\\python\\bin\\python.exe`
+- `launch-windows.cmd` is a simple wrapper for the same launcher.
 
 ## Notes
 

@@ -15,8 +15,10 @@ launch-macos.command
 Double-click:
 
 ```text
-launch-windows.bat
+launch-windows.cmd
 ```
+
+If you prefer, `launch-windows.bat` works too.
 
 ### Shell
 From the project root:
