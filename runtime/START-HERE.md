@@ -26,6 +26,8 @@ From the project root:
 ./launch-linux.sh
 ```
 
+If your file manager supports it, `launch-linux.desktop` can be double-clicked too.
+
 The app will start a local server on `127.0.0.1:8000` by default and store data in:
 
 ```text
@@ -96,7 +98,26 @@ In the app, use the **Saved Reports** section:
 
 Use **Clone** only when you want a new report based on an old one.
 
-## 5) What to back up
+## 5) How to update safely
+
+The app can check GitHub for a newer version when it is online. If it finds one, it shows an update banner with safe steps.
+
+To update without losing any saved reports:
+1. Close the app.
+2. Keep the `data/` folder intact or copy it elsewhere first.
+3. Replace the app files with the new version.
+4. Reopen the launcher.
+
+If you use Git, the update is usually just:
+```bash
+git pull
+```
+
+If you use a USB stick, copy the refreshed app files over the old ones but do **not** delete `data/`.
+
+---
+
+## 6) What to back up
 
 For a full portable backup, copy these folders/files together:
 

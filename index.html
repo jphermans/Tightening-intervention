@@ -51,15 +51,72 @@
             color: var(--ac-charcoal);
             background: #f5f2ef;
         }
-        header {
-            background: var(--ac-primary);
-            color: #fff;
-            padding: 24px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        body[data-theme="dark"] {
+            color: #e8eef2;
+            background: #0f1418;
+            color-scheme: dark;
         }
+        body[data-theme="dark"] header {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+        }
+        body[data-theme="dark"] form,
+        body[data-theme="dark"] .reports-section,
+        body[data-theme="dark"] .modal-box,
+        body[data-theme="dark"] .toast {
+            background: #171d22;
+            color: #e8eef2;
+        }
+        body[data-theme="dark"] .section-title {
+            color: #8dd8ef;
+            border-bottom-color: #1f4c5b;
+        }
+        body[data-theme="dark"] .field-help,
+        body[data-theme="dark"] .reports-hint,
+        body[data-theme="dark"] .reports-help,
+        body[data-theme="dark"] .empty,
+        body[data-theme="dark"] .signature-hint,
+        body[data-theme="dark"] .modal-message,
+        body[data-theme="dark"] .signature-statement,
+        body[data-theme="dark"] .subtitle {
+            color: #b3c4cc;
+        }
+        body[data-theme="dark"] .reports-section,
+        body[data-theme="dark"] .report-item,
+        body[data-theme="dark"] .modal-box,
+        body[data-theme="dark"] .toast,
+        body[data-theme="dark"] input,
+        body[data-theme="dark"] select,
+        body[data-theme="dark"] textarea,
+        body[data-theme="dark"] .custom-date-btn,
+        body[data-theme="dark"] .inline-group button,
+        body[data-theme="dark"] .attachments-toolbar button,
+        body[data-theme="dark"] .reports-toolbar button,
+        body[data-theme="dark"] button.secondary {
+            border-color: #3a4a55;
+            background: #12171b;
+            color: #e8eef2;
+        }
+        body[data-theme="dark"] .report-item:hover,
+        body[data-theme="dark"] .inline-group button:hover,
+        body[data-theme="dark"] .attachments-toolbar button:hover,
+        body[data-theme="dark"] .reports-toolbar button:hover,
+        body[data-theme="dark"] button.secondary:hover,
+        body[data-theme="dark"] .custom-date-btn:hover {
+            background: #1c242a;
+        }
+        body[data-theme="dark"] button:not(.secondary) {
+            color: #fff;
+        }
+        body[data-theme="dark"] .reports-section {
+            box-shadow: 0 1px 4px rgba(0,0,0,0.24);
+        }
+        body[data-theme="dark"] .update-banner {
+            background: #2a2411;
+            color: #f8e7ad;
+            border-color: #f4b400;
+        }
+        body[data-theme="dark"] .update-banner strong { color: #fff0bd; }
+        body[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.72); }
         header .inner { max-width: 900px; margin: auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
         header .header-text { flex: 1 1 auto; min-width: 0; }
         header h1 { margin: 0; font-size: 1.6rem; font-weight: 600; }
@@ -609,6 +666,7 @@
             color: var(--ac-grey);
             line-height: 1.5;
             margin: 0 0 20px;
+            white-space: pre-wrap;
         }
         .modal-actions {
             display: flex;
@@ -734,8 +792,27 @@
         .reports-section.is-empty .reports-body {
             display: block !important;
             padding-top: 0;
-            border-top: none;
         }
+
+        .update-banner {
+            margin: 14px 0 0;
+            padding: 12px 14px;
+            border: 1px solid #f4b400;
+            border-left-width: 4px;
+            border-radius: 8px;
+            background: #fff8df;
+            color: #5b4700;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .update-banner strong { color: #4d3d00; }
+        .update-banner .update-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .update-banner button { white-space: nowrap; }
+        .update-banner[hidden] { display: none !important; }
+
         .reports-section.is-empty .reports-toolbar #clearAllBtn,
         .reports-section.is-empty .reports-toolbar #exportAllBtn { display: none; }
         .reports-help {
@@ -1729,6 +1806,16 @@
     </header>
 
     <main class="container">
+        <div id="updateBanner" class="update-banner" hidden>
+            <div>
+                <strong>Update available.</strong>
+                <span id="updateBannerText"></span>
+            </div>
+            <div class="update-actions">
+                <button type="button" class="secondary" id="updateInfoBtn">How to update safely</button>
+                <button type="button" class="secondary" id="updateDismissBtn">Dismiss</button>
+            </div>
+        </div>
         <form id="interventionForm">
             <div class="section-title">Report</div>
             <div class="grid">
@@ -1989,12 +2076,12 @@
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 2h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l-1-2z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
                     Fill Demo
                 </button>
-                <button type="button" class="secondary help-btn" id="helpToggleBtn" title="Show or hide help text under every field." aria-pressed="false">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    Help
+                <button type="button" class="secondary" id="themeToggleBtn" title="Switch between light and dark mode while keeping the Atlas Copco style." aria-pressed="false">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+                    <span id="themeToggleLabel">Dark mode</span>
                 </button>
                 <input type="file" id="jsonFileInput" accept="application/json,.json" aria-hidden="true">
-            </div>
+
         </form>
 
         <section class="reports-section" id="reportsSection" data-collapsed="false" aria-label="Saved reports">
@@ -2133,6 +2220,23 @@
             }
         };
 
+        const THEME_KEY = 'uiTheme';
+        function applyTheme(theme) {
+            const resolved = theme === 'dark' ? 'dark' : 'light';
+            document.body.dataset.theme = resolved;
+            storage.set(THEME_KEY, resolved);
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0f1418' : '#0092BC');
+            const btn = document.getElementById('themeToggleBtn');
+            const label = document.getElementById('themeToggleLabel');
+            if (btn) btn.setAttribute('aria-pressed', resolved === 'dark' ? 'true' : 'false');
+            if (label) label.textContent = resolved === 'dark' ? 'Light mode' : 'Dark mode';
+        }
+        function toggleTheme() {
+            applyTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark');
+        }
+        applyTheme(storage.get(THEME_KEY, 'light'));
+
         function readLocalReports() {
             try {
                 const parsed = JSON.parse(storage.get('reports', '[]'));
@@ -2143,6 +2247,11 @@
             }
         }
 
+        const APP_VERSION = '1.1.0';
+        const VERSION_URL = 'version.json';
+        const GITHUB_VERSION_API = 'https://api.github.com/repos/jphermans/Service-intervention/contents/version.json?ref=main';
+        const UPDATE_SEEN_KEY = 'updateAlertSeenVersion';
+        let latestRemoteVersion = '';
         const reportApi = {
             available: false,
             warnedOffline: false
@@ -2157,6 +2266,105 @@
             reportCache = Array.isArray(reports) ? reports : [];
             storage.set('reports', JSON.stringify(reportCache));
             return reportCache;
+        }
+
+        function compareVersions(a, b) {
+            const parse = (v) => String(v || '').trim().replace(/^v/i, '').split(/[.-]/).map(x => {
+                const n = Number(x);
+                return Number.isFinite(n) ? n : x;
+            });
+            const left = parse(a);
+            const right = parse(b);
+            const len = Math.max(left.length, right.length);
+            for (let i = 0; i < len; i++) {
+                const x = left[i] ?? 0;
+                const y = right[i] ?? 0;
+                if (typeof x === 'number' && typeof y === 'number') {
+                    if (x !== y) return x > y ? 1 : -1;
+                } else {
+                    const xs = String(x);
+                    const ys = String(y);
+                    if (xs !== ys) return xs > ys ? 1 : -1;
+                }
+            }
+            return 0;
+        }
+
+        async function readLocalVersion() {
+            try {
+                const response = await fetch(VERSION_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`version.json returned ${response.status}`);
+                return await response.json();
+            } catch (err) {
+                console.warn('Could not read local version info:', err);
+                return { version: APP_VERSION };
+            }
+        }
+
+        async function readRemoteVersion() {
+            try {
+                const response = await fetch(GITHUB_VERSION_API, {
+                    cache: 'no-store',
+                    headers: { 'Accept': 'application/vnd.github+json' }
+                });
+                if (!response.ok) throw new Error(`GitHub version lookup failed (${response.status})`);
+                const payload = await response.json();
+                if (!payload || typeof payload.content !== 'string') throw new Error('GitHub payload missing content');
+                const json = atob(payload.content.replace(/\s+/g, ''));
+                return JSON.parse(json);
+            } catch (err) {
+                console.warn('Could not fetch remote version info:', err);
+                return null;
+            }
+        }
+
+        function safeUpdateInstructions(localVersion, remoteVersion) {
+            return [
+                `Current version: ${localVersion || APP_VERSION}`,
+                `Latest version: ${remoteVersion || 'unknown'}`,
+                '',
+                'Your reports are stored in ./data/intervention_reports.sqlite3, so updating the app files does not delete saved data.',
+                '',
+                'Safe update steps:',
+                '1. Close the app.',
+                '2. Keep the ./data/ folder as-is or copy it somewhere safe first.',
+                '3. Replace the app files with the latest repo version (git pull, zip download, or updated USB copy).',
+                '4. Reopen the launcher.',
+                '',
+                'If you use Git, run: git pull',
+                'If you use a USB stick, copy the new app files over the old ones but do not delete ./data/.'
+            ].join('\n');
+        }
+
+        function showUpdateBanner(localVersion, remoteVersion) {
+            const banner = document.getElementById('updateBanner');
+            const text = document.getElementById('updateBannerText');
+            if (!banner || !text) return;
+            latestRemoteVersion = remoteVersion;
+            text.textContent = `v${remoteVersion} is available (you have v${localVersion}). Click for safe update steps.`;
+            banner.hidden = false;
+            showToast(`Update available: v${remoteVersion}`, 'warn');
+        }
+
+        function hideUpdateBanner() {
+            const banner = document.getElementById('updateBanner');
+            if (banner) banner.hidden = true;
+        }
+
+        async function checkForUpdates() {
+            if (!navigator.onLine) return false;
+            const local = await readLocalVersion();
+            const remote = await readRemoteVersion();
+            const localVersion = String(local?.version || APP_VERSION);
+            const remoteVersion = String(remote?.version || '');
+            if (!remoteVersion) return false;
+            if (compareVersions(remoteVersion, localVersion) <= 0) return false;
+            const seen = storage.get(UPDATE_SEEN_KEY, '');
+            if (seen !== remoteVersion) {
+                storage.set(UPDATE_SEEN_KEY, remoteVersion);
+                showUpdateBanner(localVersion, remoteVersion);
+            }
+            return true;
         }
 
         async function apiRequest(path, options) {
@@ -2274,7 +2482,7 @@
                         <h3 class="modal-title" id="modalTitle">${escapeHtml(opts.title || 'Please confirm')}</h3>
                         <p class="modal-message">${escapeHtml(opts.message || '')}</p>
                         <div class="modal-actions">
-                            <button type="button" class="modal-cancel">Cancel</button>
+                            <button type="button" class="modal-cancel">${escapeHtml(opts.cancelText || 'Cancel')}</button>
                             <button type="button" class="modal-confirm ${opts.danger ? 'danger' : ''}">${escapeHtml(opts.confirmText || 'Confirm')}</button>
                         </div>
                     </div>
@@ -4294,6 +4502,7 @@ function openCalendar(anchorEl, currentIso, onSelect) {
             if (usingApi) {
                 console.log('Using local SQLite report database');
             }
+            await checkForUpdates();
         })();
 
         // Click and keyboard handlers for the Saved Reports toggle header
@@ -4324,7 +4533,29 @@ function openCalendar(anchorEl, currentIso, onSelect) {
                 label.insertAdjacentElement('afterend', helpDiv);
             });
 
+            const updateInfoBtn = document.getElementById('updateInfoBtn');
+            const updateDismissBtn = document.getElementById('updateDismissBtn');
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
             const helpBtn = document.getElementById('helpToggleBtn');
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', () => toggleTheme());
+            }
+            if (updateInfoBtn) {
+                updateInfoBtn.addEventListener('click', async () => {
+                    await confirmDialog({
+                        title: 'How to update safely',
+                        message: safeUpdateInstructions(APP_VERSION, latestRemoteVersion || 'latest'),
+                        confirmText: 'OK',
+                        cancelText: 'Close'
+                    });
+                });
+            }
+            if (updateDismissBtn) {
+                updateDismissBtn.addEventListener('click', () => {
+                    hideUpdateBanner();
+                });
+            }
+
             if (!helpBtn) return;
             // Restore saved state
             if (storage.get('helpVisible') === 'true') {
@@ -4350,6 +4581,10 @@ function openCalendar(anchorEl, currentIso, onSelect) {
                 });
             });
         }
+
+        window.addEventListener('online', () => {
+            checkForUpdates();
+        });
     </script>
 </body>
 </html>

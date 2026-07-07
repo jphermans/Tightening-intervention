@@ -8,12 +8,14 @@ Use this checklist when you want to hand the app to someone on a stick.
 - `server.py`
 - `serve.sh`
 - `launch-linux.sh`
+- `launch-linux.desktop`
 - `launch-macos.command`
 - `launch-windows.bat`
 - `launch-windows.ps1`
 - `build-windows-exe.ps1`
 - `manifest.json`
 - `sw.js`
+- `version.json`
 - `icons/`
 - `runtime/` *(optional bundled Python runtime)*
 - `data/` *(created automatically at first run)*

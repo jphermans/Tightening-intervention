@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Atlas Copco Intervention Report
+Comment=Launch the local SQLite intervention report server
+Terminal=false
+Exec=sh -c 'cd "$(dirname "$1")" && exec ./launch-linux.sh' sh %k
+Icon=utilities-terminal
+Categories=Office;Utility;
